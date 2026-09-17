@@ -464,16 +464,19 @@
                     try {
                         const response = await fetch(APPS_SCRIPT_URL, {
                             method: 'POST',
-                            mode: 'no-cors', 
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify(payload)
                         });
 
-                        msgEl.textContent = "✅ ¡Enviado! Tu recibo está en verificación.";
-                        msgEl.classList.replace('text-yellow-400', 'text-green-400');
-                        setTimeout(() => { navTo('screen-home'); btn.disabled = false; msgEl.classList.add('hidden'); }, 4000);
+                        const result = await response.json();
+                        if(result.status === "success") {
+                            msgEl.textContent = "✅ ¡Enviado! Tu recibo está en verificación.";
+                            msgEl.classList.replace('text-yellow-400', 'text-green-400');
+                            setTimeout(() => { navTo('screen-home'); btn.disabled = false; msgEl.classList.add('hidden'); }, 4000);
+                        } else {
+                            throw new Error(result.message);
+                        }
                     } catch(err) {
-                        msgEl.textContent = "❌ Error al enviar. Revisa tu conexión.";
+                        msgEl.textContent = "❌ Error al enviar. Intenta de nuevo.";
                         msgEl.classList.replace('text-yellow-400', 'text-red-400');
                         btn.disabled = false;
                     }
