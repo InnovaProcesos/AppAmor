@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafío de Amor ❤️ - Plataforma</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Pacifico&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #2d0a1f 0%, #0a0105 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-font { font-family: 'Pacifico', cursive; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.5s; }
+
+        /* Pantallas */
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+        .screen.active {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(20, 5, 15, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 100, 150, 0.2);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 77, 109, 0.1);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Estilo Scrollbar Dashboard */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(236,72,153,0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(236,72,153,0.8); }
+
+        /* Polaroid */
+        .polaroid {
+            background: white;
+            padding: 15px 15px 40px 15px;
+            border-radius: 4px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: scale(0.8) rotate(-5deg);
+            transition: all 0.5s;
+            max-width: 90vw;
+        }
+        .modal-overlay.active .polaroid {
+            transform: scale(1) rotate(random(-3deg, 3deg));
+        }
+        .polaroid img {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            object-fit: cover;
+            background: #eee;
+        }
+        .polaroid p {
+            color: #333;
+            font-family: 'Pacifico', cursive;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'amor-amistad-saas';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            // Fallback config is not needed for this environment as it's injected
+        };
+
+        let app, db, auth;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            window.db = db;
+            window.auth = auth;
+            window.appId = appId;
+        } catch (e) {
+            console.error("Firebase init error", e);
+        }
+
+        // Autenticación inicial
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Autenticado en Firebase. User:", auth.currentUser.uid);
+            } catch (error) {
+                console.error("Error de autenticación:", error);
+            }
+        }
+        
+        window.initAuth = initAuth;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.doc = doc;
+    </script>
+</head>
+<body>
+
+    <!-- Fondos decorativos -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-pink-600 rounded-full mix-blend-screen filter blur-[50px] animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-40 h-40 bg-purple-600 rounded-full mix-blend-screen filter blur-[60px] animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="container mx-auto px-4 relative z-10 w-full max-w-3xl min-h-screen flex flex-col justify-center py-10">
+
+        <section id="screen-home" class="screen active flex-col items-center justify-center text-center">
+            <div class="mb-4 animate-float">
+                <i class="fa-solid fa-gift text-6xl text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]"></i>
+            </div>
+            <h1 class="text-5xl md:text-6xl title-font mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-500">
+                Regalo Interactivo
+            </h1>
+            <p class="text-gray-300 mb-10 max-w-md mx-auto">La plataforma para crear experiencias únicas y sorprender a tu pareja con un juego personalizado.</p>
+            
+            <div class="flex flex-col md:flex-row gap-6 w-full justify-center">
+                <!-- Botón Creador -->
+                <button onclick="navTo('screen-creator-login')" class="glass-panel hover:border-pink-500 hover:bg-pink-900/40 p-6 rounded-2xl transition-all duration-300 flex-1 group">
+                    <i class="fa-solid fa-wand-magic-sparkles text-4xl text-pink-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h2 class="text-xl font-bold mb-2">Crear Regalo</h2>
+                    <p class="text-xs text-gray-400">Tengo un código de compra y quiero armar las preguntas.</p>
+                </button>
+                
+                <!-- Botón Jugador -->
+                <button onclick="navTo('screen-player-login')" class="glass-panel hover:border-purple-500 hover:bg-purple-900/40 p-6 rounded-2xl transition-all duration-300 flex-1 group">
+                    <i class="fa-solid fa-gamepad text-4xl text-purple-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h2 class="text-xl font-bold mb-2">Jugar / Recibir</h2>
+                    <p class="text-xs text-gray-400">Tengo un código de juego que me enviaron para participar.</p>
+                </button>
+            </div>
+            
+            <!-- Botón Comprar -->
+            <button onclick="navTo('screen-purchase')" class="mt-8 bg-gradient-to-r from-green-500 to-emerald-600 font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-green-500/30 transition-all text-white border border-green-400/50">
+                <i class="fa-solid fa-cart-shopping mr-2"></i> Adquirir esta App
+            </button>
+        </section>
+
+        <section id="screen-purchase" class="screen flex-col items-center justify-center">
+            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
+            <div class="glass-panel p-6 md:p-8 rounded-3xl w-full max-w-md text-center border-green-500/30">
+                <i class="fa-solid fa-money-bill-transfer text-4xl text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Adquiere tu Acceso</h2>
+                <p class="text-sm text-gray-300 mb-4">Transfiere <b>$15.000 COP</b> a Nequi o Daviplata (310XXXXXXX) y sube el comprobante aquí.</p>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Tu Nombre</label>
+                        <input type="text" id="buyer-name" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-2 text-white outline-none focus:border-green-500" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Tu Correo Electrónico (Allí llegará el código)</label>
+                        <input type="email" id="buyer-email" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-2 text-white outline-none focus:border-green-500" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Subir Comprobante (Imagen)</label>
+                        <input type="file" id="buyer-receipt" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-900/50 file:text-green-300 hover:file:bg-green-800/50 cursor-pointer">
+                    </div>
+                </div>
+
+                <button id="btn-submit-payment" onclick="submitPayment()" class="w-full mt-6 bg-gradient-to-r from-green-600 to-emerald-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-green-500/30 transition-all">
+                    Enviar Comprobante
+                </button>
+                <p id="payment-msg" class="text-sm mt-3 hidden"></p>
+            </div>
+        </section>
+
+        <section id="screen-creator-login" class="screen flex-col items-center justify-center">
+            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
+            <div class="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
+                <i class="fa-solid fa-key text-4xl text-pink-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Acceso de Creador</h2>
+                <p class="text-sm text-gray-400 mb-6">Ingresa el código que recibiste en tu correo tras la compra.</p>
+                
+                <input type="text" id="admin-code" placeholder="Ej: ADMIN2024" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-center uppercase tracking-widest focus:border-pink-500 outline-none mb-4">
+                <p class="text-xs text-pink-400 mb-4 text-left"><i class="fa-solid fa-circle-info"></i> Para probar usa: <b>ADMIN2024</b></p>
+                
+                <button onclick="loginCreator()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-pink-500/30 transition-all">
+                    Ingresar al Panel
+                </button>
+            </div>
+        </section>
+
+        <section id="screen-creator-dashboard" class="screen flex-col w-full h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-3xl title-font text-pink-400">Tu Regalo</h2>
+                    <p class="text-sm text-gray-400">Configura las preguntas y fotos</p>
+                </div>
+                <button onclick="saveAndGenerateCode()" id="btn-save-game" class="bg-green-600 hover:bg-green-500 px-6 py-2 rounded-full font-bold shadow-lg transition-all flex items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar y Generar Código
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-hidden">
+                <!-- Columna: Lista de Preguntas -->
+                <div class="glass-panel rounded-2xl flex flex-col h-full overflow-hidden border border-gray-700">
+                    <div class="bg-gray-900/80 p-4 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="font-bold">Preguntas (<span id="q-count">0</span>)</h3>
+                    </div>
+                    <div id="questions-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <!-- Las preguntas se renderizan aquí -->
+                        <div class="text-center text-gray-500 mt-10">Aún no hay preguntas. Crea la primera a la derecha.</div>
+                    </div>
+                </div>
+
+                <!-- Columna: Formulario -->
+                <div class="glass-panel rounded-2xl p-5 overflow-y-auto h-full border border-gray-700">
+                    <h3 class="font-bold mb-4 text-pink-300" id="form-title">Nueva Pregunta</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Tipo de Pregunta</label>
+                            <select id="q-type" onchange="toggleFormFields()" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm">
+                                <option value="text">Pregunta Abierta (Escribir)</option>
+                                <option value="choice">Opción Múltiple (Botones)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Pregunta</label>
+                            <textarea id="q-text" rows="2" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-pink-500 outline-none" placeholder="Ej: ¿Dónde fue nuestro primer beso?"></textarea>
+                        </div>
+
+                        <div id="field-options" class="hidden">
+                            <label class="text-xs text-gray-400 block mb-1">Opciones (Separa por comas)</label>
+                            <input type="text" id="q-options" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-pink-500 outline-none" placeholder="Ej: Cine, Parque, Restaurante, Playa">
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Respuesta Correcta</label>
+                            <input type="text" id="q-answer" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-green-500 outline-none" placeholder="Texto exacto (no importa mayúsculas)">
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Foto al acertar (Sube una imagen)</label>
+                            <input type="file" id="q-image-upload" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-900/50 file:text-pink-300 hover:file:bg-pink-800/50 transition-all cursor-pointer">
+                            <input type="hidden" id="q-image-base64">
+                            <div id="image-preview-container" class="hidden mt-2">
+                                <img id="image-preview" class="h-20 w-20 object-cover rounded-lg border border-gray-600">
+                                <button onclick="clearImageUpload()" class="text-xs text-red-400 mt-1 hover:underline">Quitar imagen</button>
+                            </div>
+                        </div>
+
+                        <button onclick="addQuestion()" class="w-full bg-pink-600 hover:bg-pink-500 py-2 rounded-lg font-bold transition-all">
+                            Agregar Pregunta al Juego
+                        </button>
+                    </div>
+
+                    <!-- Configuración de Premios al Final -->
+                    <div class="mt-8 border-t border-gray-700 pt-6">
+                        <h3 class="font-bold mb-4 text-yellow-400">Premios Finales (3 Opciones)</h3>
+                        <div class="space-y-2">
+                            <input type="text" id="prize-1" placeholder="Premio 1 (Ej: Masaje)" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Cena Romántica">
+                            <input type="text" id="prize-2" placeholder="Premio 2" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Día de Películas">
+                            <input type="text" id="prize-3" placeholder="Premio 3" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Viaje de fin de semana">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal Código Generado -->
+        <div id="modal-game-code" class="modal-overlay">
+            <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border-green-500/50">
+                <i class="fa-solid fa-circle-check text-5xl text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">¡Juego Guardado!</h2>
+                <p class="text-sm text-gray-300 mb-4">Comparte este código con tu pareja para que pueda jugar:</p>
+                <div class="bg-black/60 p-4 rounded-xl border border-gray-600 mb-6">
+                    <span id="display-game-code" class="text-4xl font-mono font-bold text-pink-400 tracking-widest">----</span>
+                </div>
+                <button onclick="closeCodeModal()" class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-bold">Cerrar</button>
+            </div>
+        </div>
+
+        <section id="screen-player-login" class="screen flex-col items-center justify-center">
+            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
+            <div class="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
+                <i class="fa-solid fa-heart-circle-check text-5xl text-purple-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Ingresar al Juego</h2>
+                <p class="text-sm text-gray-400 mb-6">Escribe el código secreto que te compartieron.</p>
+                
+                <input type="text" id="player-code" placeholder="CÓDIGO DE 4 DÍGITOS" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-4 text-center text-xl uppercase tracking-widest focus:border-purple-500 outline-none mb-4 font-mono">
+                
+                <button id="btn-load-game" onclick="loadGameAsPlayer()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-all flex justify-center items-center">
+                    <span>Comenzar</span> <i id="player-loading-icon" class="fa-solid fa-spinner fa-spin ml-2 hidden"></i>
+                </button>
+                <p id="player-error" class="text-red-400 text-sm mt-3 hidden"></p>
+            </div>
+        </section>
+
+
+        <!-- ========================================================================= -->
+        <!-- ========================================================================= -->
+
+        <!-- PANTALLA 5: INICIO JUEGO -->
+        <section id="screen-game-start" class="screen flex-col items-center justify-center text-center py-10">
+            <div class="mb-6 text-pink-400 text-6xl animate-float relative">
+                <i class="fa-solid fa-heart text-pink-500 text-7xl drop-shadow-[0_0_25px_rgba(236,72,153,1)]"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl title-font mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-red-400 to-pink-500">
+                Nuestra Historia
+            </h1>
+            <p class="text-lg mb-8 text-gray-300 max-w-md mx-auto font-light">
+                Alguien preparó este desafío especialmente para ti. ¿Qué tanto nos conoces? Responde bien para desbloquear el premio final.
+            </p>
+            <button onclick="startGameEngine()" class="bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)] hover:scale-105 transition duration-300 text-xl border border-pink-400/50">
+                Iniciar el Desafío <i class="fa-solid fa-play ml-2"></i>
+            </button>
+        </section>
+
+        <!-- PANTALLA 6: PREGUNTAS -->
+        <section id="screen-game-question" class="screen flex-col w-full glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
+            <div class="w-full bg-gray-900/50 rounded-full h-3 mb-6 border border-gray-700/50">
+                <div id="progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-1000 w-0"></div>
+            </div>
+
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-xs md:text-sm bg-pink-900/30 px-4 py-1.5 rounded-full">Nivel 1</span>
+                <div class="flex gap-2 text-red-500 text-xl" id="lives-container"></div>
+            </div>
+
+            <div class="min-h-[120px] flex items-center justify-center mb-6">
+                <h2 id="question-text" class="text-xl md:text-3xl font-semibold text-center leading-relaxed"></h2>
+            </div>
+
+            <div id="answer-container" class="w-full mb-4 min-h-[100px] flex flex-col justify-center"></div>
+
+            <div id="feedback-message" class="text-center font-bold h-10 text-base md:text-lg transition-all duration-300 opacity-0 flex items-center justify-center translate-y-4"></div>
+
+            <button id="btn-submit" onclick="checkTextAnswer()" class="hidden w-full mt-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300">
+                Confirmar Respuesta
+            </button>
+
+            <!-- Overlays del Juego -->
+            <div id="cooldown-overlay" class="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20 hidden backdrop-blur-xl">
+                <i class="fa-solid fa-lock text-6xl text-red-500 mb-4 animate-pulse"></i>
+                <h3 class="text-3xl font-bold text-white mb-2">Bloqueado</h3>
+                <p class="text-gray-400 mb-4">Demasiados fallos.</p>
+                <span class="text-5xl font-bold text-red-500 title-font" id="cooldown-timer">15</span>
+            </div>
+            
+            <div id="polaroid-overlay" class="absolute inset-0 bg-black/90 z-30 hidden flex flex-col items-center justify-center backdrop-blur-md cursor-pointer" onclick="nextLevelFromPolaroid()">
+                <div class="polaroid" id="polaroid-card">
+                    <img id="polaroid-img" src="" alt="Recuerdo">
+                    <p>¡Recuerdo Desbloqueado!</p>
+                </div>
+                <p class="mt-8 text-gray-400 text-sm animate-pulse">Toca para continuar</p>
+            </div>
+        </section>
+
+        <!-- PANTALLA 7: SELECCIÓN PREMIO -->
+        <section id="screen-game-prize" class="screen flex-col items-center justify-center w-full">
+            <h2 class="text-4xl md:text-5xl title-font mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 text-center">¡Reto Superado!</h2>
+            <p class="text-lg mb-8 text-center text-gray-300">Elige tu recompensa misteriosa:</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full" id="prizes-container">
+                <!-- Se llenan por JS -->
+            </div>
+
+            <button id="btn-reveal-prize" onclick="revealFinalPrize()" class="mt-10 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-4 px-10 rounded-full scale-0 opacity-0 transition-all duration-500">
+                Revelar Premio <i class="fa-solid fa-unlock ml-2"></i>
+            </button>
+        </section>
+
+        <!-- PANTALLA 8: TICKET -->
+        <section id="screen-game-ticket" class="screen flex-col items-center justify-center text-center">
+            <div class="bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600 rounded-3xl p-1 shadow-[0_0_50px_rgba(250,204,21,0.6)] transform hover:scale-105 transition duration-500 max-w-sm w-full">
+                <div class="border-2 border-dashed border-yellow-800 rounded-[22px] p-8 bg-yellow-100 text-yellow-900">
+                    <i class="fa-solid fa-ticket text-5xl text-yellow-700 mb-2"></i>
+                    <h2 class="text-xl font-black uppercase tracking-widest border-b-2 border-yellow-800/30 pb-2 inline-block">Vale Dorado</h2>
+                    <p class="text-sm mt-4 text-yellow-700/80 uppercase">Válido para:</p>
+                    <p id="final-prize-text" class="text-2xl font-black text-red-700 mb-6 mt-1 font-serif"></p>
+                    <p class="text-xs text-yellow-800/70">Tómale screenshot y cóbralo.</p>
+                </div>
+            </div>
+            <button onclick="navTo('screen-home')" class="mt-8 text-gray-500 hover:text-white underline text-sm">Volver al inicio</button>
+        </section>
+
+    </div>
+
+    <script>
+        // --- Variables de Estado (Plataforma y Juego) ---
+        let currentQuestions = [];
+        let finalPrizesConfig = [];
+        let loadedGameCode = "";
+        
+        // Estado Motor de Juego
+        let gameIndex = 0;
+        let attemptsLeft = 3;
+        let isCooldown = false;
+        let selectedPrizeIndex = -1;
+
+        // --- Pega la URL de tu Web App de Apps Script aquí ---
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSWvHLXqqA-HQNwkfgsoKnjvC3el3bxSTvsT35mBsYGjL113-rIGlrepA8fbVgWALbZQ/exec"; 
+
+        // --- Utilidades ---
+        function navTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                setTimeout(() => { if(!s.classList.contains('active')) s.style.display = 'none'; }, 500);
+            });
+            setTimeout(() => {
+                const target = document.getElementById(screenId);
+                target.style.display = 'flex';
+                void target.offsetWidth; // Force reflow
+                target.classList.add('active');
+            }, 500);
+        }
+
+        // --- STREAMING_CHUNK: Lógica del Creador (Dashboard) ---
+        function loginCreator() {
+            const code = document.getElementById('admin-code').value.trim().toUpperCase();
+            // Acepta ADMIN2024 para pruebas, o códigos reales si tuvieras validación local
+            // Como los códigos ahora son de tu base de datos de compradores, en una app real 
+            // leerías de Firebase primero si el código existe. Para este demo permitimos pasar
+            // asumiendo que el código de compra actúa como el ID del documento del Creador.
+            if (code.length >= 4) {
+                // Setear el código del administrador para guardar los juegos asociados a él
+                window.currentCreatorCode = code;
+                navTo('screen-creator-dashboard');
+                if(window.initAuth) window.initAuth();
+            } else {
+                alert("El código debe tener al menos 4 caracteres.");
+            }
+        }
+
+        // --- STREAMING_CHUNK: Lógica de Compra ---
+        async function submitPayment() {
+            const name = document.getElementById('buyer-name').value.trim();
+            const email = document.getElementById('buyer-email').value.trim();
+            const fileInput = document.getElementById('buyer-receipt');
+            const msgEl = document.getElementById('payment-msg');
+            const btn = document.getElementById('btn-submit-payment');
+
+            if(!name || !email || !fileInput.files[0]) {
+                alert("Por favor llena todos los campos y sube el comprobante.");
+                return;
+            }
+
+            if(APPS_SCRIPT_URL === "URL_DE_TU_APPS_SCRIPT_AQUI") {
+                alert("Debes configurar la URL de Apps Script en el código HTML.");
+                return;
+            }
+
+            msgEl.className = "text-sm mt-3 text-yellow-400";
+            msgEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando y procesando imagen...';
+            msgEl.classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    const base64Data = e.target.result;
+                    
+                    const payload = {
+                        name: name,
+                        email: email,
+                        fileName: file.name,
+                        file: base64Data
+                    };
+
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    // El no-cors mode hace que la promesa resuelva pero no podemos leer el JSON de vuelta fácil, 
+                    // asumiremos éxito si no lanza error de red.
+                    msgEl.className = "text-sm mt-3 text-green-400";
+                    msgEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Comprobante enviado! Revisa tu correo en las próximas horas.';
+                    
+                    setTimeout(() => {
+                        navTo('screen-home');
+                        btn.disabled = false;
+                        msgEl.classList.add('hidden');
+                    }, 5000);
+                };
+                
+                reader.readAsDataURL(file);
+            } catch (error) {
+                msgEl.className = "text-sm mt-3 text-red-400";
+                msgEl.textContent = "Error al enviar. Intenta de nuevo.";
+                btn.disabled = false;
+            }
+        }
+
+
+        function toggleFormFields() {
+            const type = document.getElementById('q-type').value;
+            const optionsDiv = document.getElementById('field-options');
+            optionsDiv.style.display = type === 'choice' ? 'block' : 'none';
+        }
+
+        // Sistema de compresión de imágenes en el cliente (Para no colapsar Firestore)
+        document.getElementById('q-image-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Exportar a JPEG comprimido
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('q-image-base64').value = base64;
+                    
+                    // Mostrar Preview
+                    const preview = document.getElementById('image-preview');
+                    preview.src = base64;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        function clearImageUpload() {
+            document.getElementById('q-image-upload').value = '';
+            document.getElementById('q-image-base64').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+        }
+
+        function addQuestion() {
+            const type = document.getElementById('q-type').value;
+            const text = document.getElementById('q-text').value.trim();
+            const answer = document.getElementById('q-answer').value.trim().toLowerCase();
+            const base64Image = document.getElementById('q-image-base64').value;
+
+            if(!text || !answer) return alert("Llena pregunta y respuesta");
+
+            let options = [];
+            if(type === 'choice') {
+                const optText = document.getElementById('q-options').value.trim();
+                if(!optText) return alert("Llena las opciones");
+                options = optText.split(',').map(s => s.trim());
+            }
+
+            const newQ = { type, question: text, options, answer: type === 'text' ? answer.split(',') : answer, image: base64Image };
+            currentQuestions.push(newQ);
+            
+            // Limpiar formulario
+            document.getElementById('q-text').value = '';
+            document.getElementById('q-answer').value = '';
+            document.getElementById('q-options').value = '';
+            clearImageUpload();
+            
+            renderQuestionsList();
+        }
+
+        function renderQuestionsList() {
+            const list = document.getElementById('questions-list');
+            document.getElementById('q-count').textContent = currentQuestions.length;
+            list.innerHTML = '';
+            
+            currentQuestions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-800 p-3 rounded-lg flex justify-between items-center text-sm border border-gray-700';
+                div.innerHTML = `
+                    <div class="truncate pr-4 flex-1">
+                        <span class="text-pink-400 font-bold">[${q.type === 'text' ? 'A' : 'M'}]</span> ${q.question}
+                    </div>
+                    <button onclick="removeQuestion(${idx})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function removeQuestion(idx) {
+            currentQuestions.splice(idx, 1);
+            renderQuestionsList();
+        }
+
+        // GUARDAR EN FIREBASE
+        async function saveAndGenerateCode() {
+            if(currentQuestions.length === 0) return alert("Agrega al menos 1 pregunta");
+            if(!window.auth || !window.auth.currentUser) {
+                alert("Conectando con la base de datos... intenta de nuevo en 2 segundos.");
+                window.initAuth();
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-game');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Guardando...';
+            btn.disabled = true;
+
+            const prizes = [
+                document.getElementById('prize-1').value || "Cena Romántica",
+                document.getElementById('prize-2').value || "Masaje Relajante",
+                document.getElementById('prize-3').value || "Vale por 1 Deseo"
+            ];
+
+            // Generar código único de 4 letras/numeros
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin O, 0, I, 1 para evitar confusión
+            let gameCode = '';
+            for(let i=0; i<4; i++) gameCode += chars.charAt(Math.floor(Math.random() * chars.length));
+
+            const gameData = {
+                creatorId: window.auth.currentUser.uid,
+                createdAt: Date.now(),
+                questions: currentQuestions,
+                prizes: prizes
+            };
+
+            try {
+                // REGLA 1: Ruta estricta de Firestore
+                const gameRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', gameCode);
+                await window.setDoc(gameRef, gameData);
+                
+                document.getElementById('display-game-code').textContent = gameCode;
+                document.getElementById('modal-game-code').classList.add('active');
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar. Asegúrate de tener conexión.");
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar y Generar Código';
+                btn.disabled = false;
+            }
+        }
+
+        function closeCodeModal() {
+            document.getElementById('modal-game-code').classList.remove('active');
+        }
+
+        // --- STREAMING_CHUNK: Lógica del Jugador (Leer de Firebase) ---
+        async function loadGameAsPlayer() {
+            const codeInput = document.getElementById('player-code').value.trim().toUpperCase();
+            const errEl = document.getElementById('player-error');
+            const icon = document.getElementById('player-loading-icon');
+            
+            if(codeInput.length !== 4) {
+                errEl.textContent = "El código debe tener 4 caracteres.";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            errEl.classList.add('hidden');
+            icon.classList.remove('hidden');
+
+            if(!window.auth || !window.auth.currentUser) await window.initAuth();
+            if(!window.auth.currentUser) return; // Fallo auth
+
+            try {
+                // REGLA 1 & 2: Query simple para leer el documento
+                const gameRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', codeInput);
+                const snapshot = await window.getDoc(gameRef);
+
+                if(snapshot.exists()) {
+                    const data = snapshot.data();
+                    currentQuestions = data.questions;
+                    finalPrizesConfig = data.prizes;
+                    loadedGameCode = codeInput;
+                    
+                    // Iniciar UI del Juego
+                    navTo('screen-game-start');
+                } else {
+                    errEl.textContent = "Código no encontrado. Verifica y vuelve a intentar.";
+                    errEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                errEl.textContent = "Error de conexión.";
+                errEl.classList.remove('hidden');
+            } finally {
+                icon.classList.add('hidden');
+            }
+        }
+
+        // --- STREAMING_CHUNK: Motor del Juego (El Desafío) ---
+        function startGameEngine() {
+            navTo('screen-game-question');
+            gameIndex = 0;
+            attemptsLeft = 3;
+            loadQuestionUI();
+        }
+
+        function loadQuestionUI() {
+            const q = currentQuestions[gameIndex];
+            const qText = document.getElementById('question-text');
+            const ansCont = document.getElementById('answer-container');
+            const btnSub = document.getElementById('btn-submit');
+            
+            qText.textContent = q.question;
+            document.getElementById('level-indicator').textContent = `Nivel ${gameIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('progress-bar').style.width = `${(gameIndex / currentQuestions.length) * 100}%`;
+            
+            renderLivesUI();
+            document.getElementById('feedback-message').style.opacity = 0;
+            ansCont.innerHTML = ''; 
+
+            if (q.type === 'text') {
+                btnSub.style.display = 'block';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'answer-input';
+                input.placeholder = "Escribe tu respuesta...";
+                input.className = 'w-full bg-black/40 border-2 border-pink-500/50 rounded-xl px-4 py-4 text-center text-xl outline-none focus:border-pink-400';
+                input.addEventListener('keypress', e => { if (e.key === 'Enter') checkTextAnswer(); });
+                ansCont.appendChild(input);
+                setTimeout(() => input.focus(), 600);
+            } 
+            else {
+                btnSub.style.display = 'none'; 
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 w-full';
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.textContent = opt;
+                    btn.className = 'bg-gray-800 hover:bg-pink-600 border border-gray-600 font-medium py-4 px-4 rounded-xl transition-all';
+                    btn.onclick = () => checkChoiceAnswer(opt);
+                    grid.appendChild(btn);
+                });
+                ansCont.appendChild(grid);
+            }
+        }
+
+        function renderLivesUI() {
+            const cont = document.getElementById('lives-container');
+            cont.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const icon = document.createElement('i');
+                icon.className = i < attemptsLeft ? 'fa-solid fa-heart animate-pulse' : 'fa-solid fa-heart-crack text-gray-700';
+                cont.appendChild(icon);
+            }
+        }
+
+        function checkChoiceAnswer(sel) {
+            if (isCooldown) return;
+            const correct = currentQuestions[gameIndex].answer;
+            if (sel.toLowerCase().trim() === correct.toLowerCase().trim()) handleRight();
+            else handleWrong();
+        }
+
+        function checkTextAnswer() {
+            if (isCooldown) return;
+            const q = currentQuestions[gameIndex];
+            const val = document.getElementById('answer-input').value.trim().toLowerCase();
+            if (!val) return;
+            
+            const isOk = Array.isArray(q.answer) ? q.answer.some(a => val.includes(a.toLowerCase())) : val.includes(q.answer.toLowerCase());
+            if (isOk) handleRight();
+            else handleWrong();
+        }
+
+        function handleRight() {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
+            
+            const q = currentQuestions[gameIndex];
+            if(q.image) {
+                // Mostrar Polaroid si el creador subió imagen
+                const overlay = document.getElementById('polaroid-overlay');
+                document.getElementById('polaroid-img').src = q.image;
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.classList.add('active'), 50);
+            } else {
+                // Pasar directo si no hay imagen
+                nextLevelFromPolaroid(); 
+            }
+        }
+
+        function nextLevelFromPolaroid() {
+            const overlay = document.getElementById('polaroid-overlay');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+
+            gameIndex++;
+            attemptsLeft = 3; 
+            
+            if (gameIndex < currentQuestions.length) {
+                loadQuestionUI();
+            } else {
+                document.getElementById('progress-bar').style.width = `100%`;
+                setTimeout(() => finishGameUI(), 500);
+            }
+        }
+
+        function handleWrong() {
+            attemptsLeft--;
+            renderLivesUI();
+            const input = document.getElementById('answer-input');
+            if (input) { input.value = ''; input.focus(); }
+            
+            if (attemptsLeft <= 0) {
+                isCooldown = true;
+                const overlay = document.getElementById('cooldown-overlay');
+                const timerEl = document.getElementById('cooldown-timer');
+                overlay.style.display = 'flex';
+                
+                let t = 15;
+                timerEl.textContent = t;
+                const int = setInterval(() => {
+                    t--; timerEl.textContent = t;
+                    if(t <= 0) {
+                        clearInterval(int);
+                        overlay.style.display = 'none';
+                        isCooldown = false;
+                        attemptsLeft = 3;
+                        renderLivesUI();
+                    }
+                }, 1000);
+            }
+        }
+
+        function finishGameUI() {
+            navTo('screen-game-prize');
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+            
+            const cont = document.getElementById('prizes-container');
+            cont.innerHTML = '';
+            const icons = ['fa-gift', 'fa-star', 'fa-heart'];
+            const colors = ['border-pink-500', 'border-purple-500', 'border-yellow-500'];
+            
+            finalPrizesConfig.forEach((p, i) => {
+                const box = document.createElement('div');
+                box.className = `glass-panel rounded-2xl p-6 text-center border-2 border-gray-600 hover:${colors[i]} cursor-pointer transition-all`;
+                box.onclick = () => selectPrizeUI(i, box);
+                box.innerHTML = `
+                    <i class="fa-solid ${icons[i]} text-4xl mb-3 animate-float text-gray-300"></i>
+                    <h3 class="text-xl font-bold mb-2">Caja ${i+1}</h3>
+                    <p class="text-xs text-gray-400">Misterio...</p>
+                `;
+                cont.appendChild(box);
+            });
+        }
+
+        function selectPrizeUI(idx, el) {
+            selectedPrizeIndex = idx;
+            document.querySelectorAll('#prizes-container > div').forEach(d => {
+                d.style.borderColor = '#4b5563'; d.style.transform = 'scale(1)';
+            });
+            el.style.borderColor = '#facc15';
+            el.style.transform = 'scale(1.05)';
+            
+            const btn = document.getElementById('btn-reveal-prize');
+            btn.classList.remove('scale-0', 'opacity-0');
+        }
+
+        function revealFinalPrize() {
+            if(selectedPrizeIndex === -1) return;
+            document.getElementById('final-prize-text').textContent = finalPrizesConfig[selectedPrizeIndex];
+            navTo('screen-game-ticket');
+            setTimeout(() => {
+                confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#facc15', '#ffffff'] });
+                confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#facc15', '#ffffff'] });
+            }, 500);
+        }
+    </script>
+</body>
+</html>
