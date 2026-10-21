@@ -67,10 +67,9 @@
             border-radius: 30px;
         }
 
-        /* Imágenes de los avatares elegantes */
         .avatar-img {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             object-fit: cover;
             border-radius: 50%;
             border: 3px solid rgba(255, 100, 150, 0.5);
@@ -83,8 +82,8 @@
             position: relative;
             width: 100%;
             max-width: 500px;
-            height: 70vh;
-            min-height: 500px;
+            height: 75vh;
+            min-height: 550px;
             background: radial-gradient(circle, rgba(50,15,40,0.8) 0%, rgba(10,1,5,0) 80%);
             border-radius: 40px;
             margin: 0 auto;
@@ -92,8 +91,8 @@
 
         .level-node {
             position: absolute;
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             background: rgba(30, 41, 59, 0.9);
             border: 3px solid #334155;
             border-radius: 50%;
@@ -102,7 +101,7 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1rem;
             z-index: 10;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
@@ -122,17 +121,17 @@
             color: white;
         }
 
-        /* Avatar Osita en el Mapa */
         #map-avatar {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             border: 2px solid white;
             box-shadow: 0 0 15px #ff69b4;
             transform: translate(-50%, -50%);
             z-index: 20;
             transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
+            object-fit: cover;
         }
 
         .map-path {
@@ -147,6 +146,19 @@
             animation: dash 30s linear infinite;
         }
         @keyframes dash { to { stroke-dashoffset: 1000; } }
+
+        /* Loader Final */
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 100, 150, 0.2);
+            border-top-color: #ff69b4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
@@ -163,16 +175,16 @@
             
             <div class="flex justify-center items-center gap-6 mb-8">
                 <div class="flex flex-col items-center animate-float-reverse">
-                    <!-- Lobo -->
-                    <img src="image_42b75e.png" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Lobito">
-                    <span class="mt-3 text-sm text-blue-300 font-bold bg-blue-900/40 px-4 py-1 rounded-full">Lobito</span>
+                    <!-- Avatar Yeison -->
+                    <img src="https://drive.google.com/uc?export=view&id=1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Yeison">
+                    <span class="mt-3 text-sm text-blue-300 font-bold bg-blue-900/40 px-4 py-1 rounded-full">Yeison</span>
                 </div>
                 
                 <div class="text-5xl text-pink-500 heartbeat mt-[-20px]">💖</div>
                 
                 <div class="flex flex-col items-center animate-float">
-                    <!-- Osita -->
-                    <img src="image_42b79c.png" class="avatar-img" alt="Osita">
+                    <!-- Avatar Valentina -->
+                    <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="avatar-img" alt="Valentina">
                     <span class="mt-3 text-sm text-pink-300 font-bold bg-pink-900/40 px-4 py-1 rounded-full">Valen</span>
                 </div>
             </div>
@@ -183,7 +195,7 @@
             </h1>
             
             <p class="text-gray-300 mb-10 max-w-md mx-auto text-lg font-light leading-relaxed">
-                Bienvenida, pequeña osita. He preparado 10 niveles especiales para ti. ¿Estás lista para comenzar nuestra aventura?
+                Bienvenida, pequeña osita. He preparado 14 niveles especiales recordando nuestra historia. ¿Estás lista para comenzar nuestra aventura?
             </p>
             
             <button onclick="enterMapWorld()" class="bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-12 rounded-full shadow-[0_0_30px_rgba(236,72,153,0.4)] hover:scale-105 transition duration-300 text-xl border border-pink-400/50">
@@ -191,28 +203,28 @@
             </button>
         </section>
 
-        <!-- PANTALLA 2: EL MAPA ELEGANTE -->
+        <!-- PANTALLA 2: EL MAPA DE 14 NIVELES -->
         <section id="screen-map" class="screen flex-col items-center justify-center">
             <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider">La Isla de Nuestro Amor</h2>
-            <p class="text-sm text-gray-400 mb-6 font-light">Guía a la osita hasta el gran premio final</p>
+            <p class="text-sm text-gray-400 mb-6 font-light">Llega al final sin perder todas tus vidas</p>
             
             <div class="island-container glass-panel" id="map-container">
                 <svg class="map-path" width="100%" height="100%">
                     <polyline id="path-line" fill="none" stroke="rgba(236,72,153,0.5)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
                 </svg>
 
-                <img src="image_42b79c.png" id="map-avatar" alt="Avatar Osita">
+                <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" id="map-avatar" alt="Avatar Osita">
 
                 <div id="nodes-container"></div>
             </div>
         </section>
 
-        <!-- PANTALLA 3: LA PREGUNTA (Diseño Original Elegante) -->
+        <!-- PANTALLA 3: LA PREGUNTA -->
         <section id="screen-game-question" class="screen flex-col w-full glass-panel p-6 md:p-10 relative overflow-hidden">
             <button onclick="navTo('screen-map')" class="absolute top-6 left-6 text-gray-400 hover:text-white z-10 transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Mapa</button>
             
             <div class="flex justify-between items-center mb-8 mt-6 border-b border-white/10 pb-4">
-                <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-sm bg-pink-900/30 px-5 py-2 rounded-full">Mundo 1</span>
+                <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-sm bg-pink-900/30 px-5 py-2 rounded-full">Nivel 1</span>
                 <div class="flex gap-2 text-pink-500 text-xl" id="lives-container"></div>
             </div>
 
@@ -227,37 +239,71 @@
             </button>
         </section>
 
-        <!-- Modal Simple de Nivel Superado -->
+        <!-- PANTALLA 4: CARGA FINAL (ÉXITO) -->
+        <section id="screen-loading-final" class="screen flex-col items-center justify-center text-center">
+            <div class="glass-panel p-10 rounded-[40px] max-w-md w-full border-pink-500/50">
+                <div class="spinner mb-8"></div>
+                <h2 class="text-3xl title-font text-pink-400 mb-4">¡Reto Superado!</h2>
+                <p class="text-gray-300 text-lg font-light animate-pulse">Cargando tu recompensa especial...<br>Preparando detalles mágicos...</p>
+                <div class="mt-8 flex justify-center gap-4">
+                    <img src="https://drive.google.com/uc?export=view&id=1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="w-16 h-16 rounded-full border-2 border-white object-cover">
+                    <div class="text-3xl text-pink-500 mt-2 heartbeat">💖</div>
+                    <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="w-16 h-16 rounded-full border-2 border-white object-cover">
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Modal de Nivel Superado -->
         <div id="level-passed-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeLevelPassedOverlay()">
             <div class="bg-white p-8 rounded-2xl text-center shadow-2xl max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="passed-content">
                 <i class="fa-solid fa-star text-6xl text-yellow-400 mb-4 animate-spin-slow"></i>
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Nivel Superado!</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Correcto!</h2>
                 <p class="text-gray-600 mb-6" id="passed-msg">¡La osita avanza!</p>
                 <p class="text-xs text-pink-500 font-bold uppercase tracking-widest animate-pulse">Toca para continuar</p>
+            </div>
+        </div>
+
+        <!-- Modal de GAME OVER -->
+        <div id="game-over-overlay" class="fixed inset-0 bg-red-950/90 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300">
+            <div class="bg-black/80 p-8 rounded-3xl text-center shadow-2xl max-w-sm mx-4 border border-red-500/50">
+                <i class="fa-solid fa-heart-crack text-6xl text-red-500 mb-4 heartbeat"></i>
+                <h2 class="text-3xl font-bold text-white mb-2">¡Oh no, Osita!</h2>
+                <p class="text-gray-300 mb-6">Has perdido todas tus vidas. Debes volver al inicio del mapa para recordar nuestra historia.</p>
+                <button onclick="restartGame()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 w-full">
+                    Volver a empezar
+                </button>
             </div>
         </div>
 
     </div>
 
     <script>
+        // TUS 14 PREGUNTAS Y RESPUESTAS
         const gameLevels = [
-            { type: 'choice', question: '¿Nivel 1: Pregunta de prueba?', options: ['Opción A', 'Opción B (Correcta)'], answer: 'Opción B (Correcta)', msg: '¡Qué inteligente eres, osita!' },
-            { type: 'text', question: 'Nivel 2: Pregunta para escribir', answer: 'amor', msg: '¡Sabía que lo adivinarías!' },
-            { type: 'choice', question: 'Nivel 3', options: ['1', '2'], answer: '1', msg: 'Avanzando...' },
-            { type: 'choice', question: 'Nivel 4', options: ['A', 'B'], answer: 'A', msg: '¡Eres la mejor!' },
-            { type: 'choice', question: 'Nivel 5', options: ['X', 'Y'], answer: 'X', msg: 'Ya vamos por la mitad' },
-            { type: 'choice', question: 'Nivel 6', options: ['1', '2'], answer: '1', msg: '¡Sigue así!' },
-            { type: 'choice', question: 'Nivel 7', options: ['1', '2'], answer: '1', msg: 'Falta poco...' },
-            { type: 'choice', question: 'Nivel 8', options: ['1', '2'], answer: '1', msg: '¡Wow!' },
-            { type: 'choice', question: 'Nivel 9', options: ['1', '2'], answer: '1', msg: '¡Último paso!' },
-            { type: 'choice', question: 'Nivel 10', options: ['Ganar', 'Perder'], answer: 'Ganar', msg: '¡Lo lograste!' }
+            { type: 'choice', question: '¿Dónde fue nuestro primer beso?', options: ['Al frente de la Clinica', 'En una panadería', 'En una Cafetería', 'Mientras estabamos en la moto'], answer: 'Al frente de la Clinica', msg: '¡Nunca lo olvidaré!' },
+            { type: 'choice', question: '¿Quién dijo “te amo” primero?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Mi osita enamorada!' },
+            { type: 'choice', question: '¿Quién le escribió primero al otro?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Me encantó que lo hicieras!' },
+            { type: 'choice', question: '¿Quién es más puntual?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Siempre a tiempo, lo acepto!' },
+            { type: 'choice', question: '¿Cuál fue la fecha en la que empezamos nuestra relación?', options: ['12/10/2026', '12/09/2026', '12/08/2026', '12/11/2026'], answer: '12/09/2026', msg: '¡El inicio de nuestra magia!' },
+            { type: 'choice', question: '¿Dónde nos vimos por primera vez?', options: ['Droguería', 'Supermercado', 'Al frente de la Iglesia', 'Parque'], answer: 'Droguería', msg: '¡Ahí cruzamos miradas!' },
+            { type: 'choice', question: '¿Cuál fue el primer regalo que te di?', options: ['Totoro', 'Babuchas', 'Chocolatina Jumbo', 'Chocolatina Jumbon´t'], answer: 'Totoro', msg: '¡Espero que aún lo abraces!' },
+            { type: 'choice', question: '¿Cuál fue el primer apodo cariñoso que usamos?', options: ['Cuchurrumi', 'Ositos', 'Los lobos', 'W Y griega'], answer: 'Ositos', msg: '¡Mis ositos!' },
+            { type: 'choice', question: '¿Qué es lo que más me gusta hacer en mi tiempo libre?', options: ['Entrenar', 'Hacer Ejercicio', 'Practicar Deporte', 'Caminar'], answer: 'Hacer Ejercicio', msg: '¡A ponernos fuertes juntos!' },
+            { type: 'choice', question: '¿Cuál es mi color favorito?', options: ['Amarillo', 'Negro', 'Azul', 'Rojo'], answer: 'Azul', msg: '¡Como el cielo!' },
+            { type: 'choice', question: '¿Qué es lo que más me cuesta expresar?', options: ['Cariño en publico', 'Sentimientos', 'Ideales y apologías', 'Partido Politico'], answer: 'Cariño en publico', msg: '¡Pero a ti te amo con todo!' },
+            { type: 'choice', question: '¿Quién se enamoró primero?', options: ['Yeison', 'Valentina'], answer: 'Valentina', msg: '¡Flechada desde el día uno!' },
+            { type: 'choice', question: '¿Qué meta me gustaría que cumpliéramos juntos?', options: ['Tener un Negocio', 'Comer sin engordar', 'Viajar', 'Toda las anteriores'], answer: 'Toda las anteriores', msg: '¡Vamos a lograrlo todo!' },
+            { type: 'text', question: 'Completa la frase .. Te Amo _____', answer: 'infinito', msg: '¡Hacia la recompensa final!' }
         ];
 
+        // Coordenadas de los 14 puntos en el mapa (ZIGZAG de abajo hacia arriba)
         const mapCoordinates = [
-            { x: 15, y: 85 }, { x: 45, y: 75 }, { x: 80, y: 80 },
-            { x: 85, y: 55 }, { x: 50, y: 45 }, { x: 15, y: 50 },
-            { x: 20, y: 25 }, { x: 50, y: 15 }, { x: 80, y: 25 },
-            { x: 50, y: 5 }
+            { x: 15, y: 90 }, { x: 45, y: 85 }, { x: 75, y: 90 }, // 1, 2, 3
+            { x: 85, y: 70 }, { x: 55, y: 65 }, { x: 25, y: 70 }, // 4, 5, 6
+            { x: 15, y: 50 }, { x: 45, y: 45 }, { x: 75, y: 50 }, // 7, 8, 9
+            { x: 85, y: 30 }, { x: 55, y: 25 }, { x: 25, y: 30 }, // 10, 11, 12
+            { x: 35, y: 10 }, { x: 70, y: 10 }                    // 13, 14 (Llegada)
         ];
 
         let currentLevelIndex = 0; 
@@ -298,12 +344,12 @@
 
                 if (i < unlockedLevel) {
                     node.classList.add('completed');
-                    node.innerHTML = '<i class="fa-solid fa-check text-sm"></i>';
+                    node.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
                 } else if (i === unlockedLevel) {
                     node.classList.add('unlocked');
                     node.onclick = () => openLevel(i);
                 } else {
-                    node.innerHTML = '<i class="fa-solid fa-lock text-xs text-gray-400"></i>';
+                    node.innerHTML = '<i class="fa-solid fa-lock" style="font-size:10px; color:#9ca3af;"></i>';
                 }
                 container.appendChild(node);
             });
@@ -323,7 +369,6 @@
 
         function openLevel(index) {
             currentLevelIndex = index;
-            attemptsLeft = 3;
             loadQuestionUI();
             navTo('screen-game-question');
         }
@@ -331,8 +376,9 @@
         function loadQuestionUI() {
             const q = gameLevels[currentLevelIndex];
             document.getElementById('question-text').textContent = q.question;
-            document.getElementById('level-indicator').textContent = `Mundo ${currentLevelIndex + 1}`;
+            document.getElementById('level-indicator').textContent = `Nivel ${currentLevelIndex + 1}`;
             renderLivesUI();
+            
             const ansCont = document.getElementById('answer-container'); 
             ansCont.innerHTML = ''; 
             const btnSub = document.getElementById('btn-submit');
@@ -341,14 +387,14 @@
                 btnSub.style.display = 'block';
                 const input = document.createElement('input'); input.type = 'text'; input.id = 'answer-input';
                 input.className = 'w-full bg-black/40 border border-pink-500/50 rounded-xl px-4 py-4 text-center text-xl outline-none focus:border-pink-400 text-white transition-colors';
-                input.placeholder = "Toca para escribir...";
+                input.placeholder = "Escribe tu respuesta...";
                 ansCont.appendChild(input); setTimeout(() => input.focus(), 600);
             } else {
                 btnSub.style.display = 'none'; 
                 const grid = document.createElement('div'); grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full';
                 q.options.forEach(opt => {
                     const btn = document.createElement('button'); btn.textContent = opt;
-                    btn.className = 'bg-gray-800 hover:bg-pink-600 border border-gray-600 font-medium py-5 px-4 rounded-xl transition-all shadow-md';
+                    btn.className = 'bg-gray-800 hover:bg-pink-600 border border-gray-600 font-medium py-4 px-4 rounded-xl transition-all shadow-md';
                     btn.onclick = () => checkChoiceAnswer(opt); grid.appendChild(btn);
                 });
                 ansCont.appendChild(grid);
@@ -359,7 +405,7 @@
             const cont = document.getElementById('lives-container'); cont.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const icon = document.createElement('i');
-                icon.className = i < attemptsLeft ? 'fa-solid fa-heart animate-pulse' : 'fa-solid fa-heart-crack text-gray-700';
+                icon.className = i < attemptsLeft ? 'fa-solid fa-heart animate-pulse' : 'fa-solid fa-heart-crack text-gray-600';
                 cont.appendChild(icon);
             }
         }
@@ -377,7 +423,7 @@
         }
 
         function handleRight() {
-            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.8 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
             document.getElementById('passed-msg').textContent = gameLevels[currentLevelIndex].msg;
             const overlay = document.getElementById('level-passed-overlay');
             overlay.style.display = 'flex';
@@ -393,23 +439,54 @@
             document.getElementById('passed-content').style.transform = 'scale(0.95)';
             setTimeout(() => {
                 overlay.style.display = 'none';
-                navTo('screen-map');
+                
+                // Incrementar nivel si es la primera vez que lo pasa
                 if (unlockedLevel === currentLevelIndex) unlockedLevel++;
-                setTimeout(() => {
-                    buildMap();
-                    updateOsitaPosition(unlockedLevel < 10 ? unlockedLevel : 9);
-                    if (unlockedLevel === 10) setTimeout(() => alert("¡Pronto haremos la pantalla de premio final!"), 2000);
-                }, 600); 
+                
+                // Si acaba de pasar el nivel 14 (índice 13), va a la pantalla final
+                if (unlockedLevel === 14) {
+                    navTo('screen-loading-final');
+                } else {
+                    navTo('screen-map');
+                    setTimeout(() => {
+                        buildMap();
+                        updateOsitaPosition(unlockedLevel);
+                    }, 600); 
+                }
             }, 300);
         }
 
         function handleWrong() {
-            attemptsLeft--; renderLivesUI();
+            attemptsLeft--; 
+            renderLivesUI();
             const input = document.getElementById('answer-input'); if (input) { input.value = ''; input.focus(); }
+            
+            // LÓGICA DE GAME OVER (Muerte Súbita)
             if (attemptsLeft <= 0) {
-                alert("Te quedaste sin vidas. Intenta el nivel de nuevo.");
-                attemptsLeft = 3; renderLivesUI();
+                const overlay = document.getElementById('game-over-overlay');
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.style.opacity = '1', 10);
             }
+        }
+
+        function restartGame() {
+            // Reiniciar Valores
+            unlockedLevel = 0;
+            currentLevelIndex = 0;
+            attemptsLeft = 3;
+            
+            // Ocultar Overlay
+            const overlay = document.getElementById('game-over-overlay');
+            overlay.style.opacity = '0';
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                navTo('screen-map');
+                setTimeout(() => {
+                    buildMap();
+                    updateOsitaPosition(0);
+                }, 600);
+            }, 300);
         }
     </script>
 </body>
