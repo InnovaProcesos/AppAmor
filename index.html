@@ -109,60 +109,86 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* --- ESTILOS DEL MAPA --- */
+        /* --- ESTILOS DEL MAPA PREMIUM --- */
         .island-container {
             position: relative;
             width: 100%;
             max-width: 500px;
             height: 75vh;
             min-height: 550px;
-            background: radial-gradient(circle, rgba(50,15,40,0.8) 0%, rgba(10,1,5,0) 80%);
+            background: linear-gradient(135deg, rgba(20,5,15,0.9), rgba(50,15,40,0.8));
             border-radius: 40px;
             margin: 0 auto;
+            overflow: hidden; /* Para las partículas */
+            border: 2px solid rgba(255, 100, 150, 0.4);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(255, 77, 109, 0.3);
         }
+
+        /* Aura giratoria de fondo */
+        .island-container::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,105,180,0.15) 0%, transparent 60%);
+            animation: rotateBg 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes rotateBg { 100% { transform: rotate(360deg); } }
 
         .level-node {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background: rgba(30, 41, 59, 0.9);
-            border: 3px solid #334155;
+            width: 45px;
+            height: 45px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(5px);
+            border: 2px solid #475569;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
             z-index: 10;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
         }
 
+        /* Nodo Actual (Pulsante) */
         .level-node.unlocked {
-            background: #ec4899;
-            border-color: #fbcfe8;
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            border-color: #fff;
             cursor: pointer;
-            box-shadow: 0 0 20px #ec4899;
-            animation: float 2s infinite;
+            color: white;
+            box-shadow: 0 0 20px #ff0844, 0 0 40px #ffb199;
+            animation: pulse-node 1.5s infinite;
+        }
+        @keyframes pulse-node {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(255, 8, 68, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 20px rgba(255, 8, 68, 0); }
+            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(255, 8, 68, 0); }
         }
         
+        /* Nodo Completado (Esmeralda) */
         .level-node.completed {
-            background: #10b981;
-            border-color: #a7f3d0;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #fff;
             color: white;
+            box-shadow: 0 0 15px #38ef7d;
         }
 
+        /* Avatar en el mapa con resplandor premium */
         #map-avatar {
             position: absolute;
-            width: 55px;
-            height: 55px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 15px #ff69b4;
+            border: 3px solid white;
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.8), inset 0 0 10px rgba(255,255,255,0.5);
             transform: translate(-50%, -50%);
             z-index: 20;
-            transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
+            transition: top 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), left 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             object-fit: cover;
         }
 
@@ -173,11 +199,30 @@
             pointer-events: none;
         }
         
+        /* Camino Dinámico Mágico */
         .map-line {
-            stroke-dasharray: 10;
-            animation: dash 30s linear infinite;
+            stroke-dasharray: 15 10;
+            animation: dashFlow 20s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.8));
         }
-        @keyframes dash { to { stroke-dashoffset: 1000; } }
+        @keyframes dashFlow { to { stroke-dashoffset: -1000; } }
+
+        /* Partículas (Luciérnagas) */
+        .firefly {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px #ffb199;
+            animation: floatParticle 8s infinite ease-in-out alternate;
+            pointer-events: none;
+            z-index: 5;
+        }
+        @keyframes floatParticle {
+            0% { transform: translate(0, 0) scale(0.8); opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { transform: translate(40px, -50px) scale(1.5); opacity: 0.2; }
+        }
 
         /* Loader Final */
         .spinner {
@@ -191,7 +236,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Estilos Tarjetas y Carta Final */
+        /* Estilos Tarjetas */
         .polaroid-frame {
             background: white;
             padding: 15px 15px 30px 15px;
@@ -208,9 +253,7 @@
             border-radius: 4px;
             background: #eee;
         }
-        .photo-fade {
-            animation: fadeIn 1s ease-in-out;
-        }
+        .photo-fade { animation: fadeIn 1s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
@@ -230,7 +273,6 @@
             position: relative;
             z-index: 10;
         }
-
     </style>
 </head>
 <body>
@@ -270,26 +312,26 @@
             </button>
         </section>
 
-        <!-- PANTALLA 2: EL MAPA DE 14 NIVELES -->
+        <!-- PANTALLA 2: EL MAPA PREMIUM -->
         <section id="screen-map" class="screen flex-col items-center justify-center relative">
-            <!-- Botón Home Superior Derecho -->
             <button onclick="navTo('screen-home')" class="absolute top-2 right-2 text-pink-400 hover:text-pink-300 z-50 p-2"><i class="fa-solid fa-house text-2xl"></i></button>
 
             <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider">La Isla de Nuestro <span onclick="cheatCode()" class="cursor-default">Amor</span></h2>
             <p class="text-sm text-gray-400 mb-6 font-light">Llega al final sin perder todas tus vidas</p>
             
-            <div class="island-container glass-panel" id="map-container">
+            <div class="island-container" id="map-container">
                 <svg class="map-path" width="100%" height="100%">
-                    <polyline id="path-line" fill="none" stroke="rgba(236,72,153,0.5)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
+                    <polyline id="path-line" fill="none" stroke="rgba(255,105,180,0.8)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
                 </svg>
                 <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" id="map-avatar" alt="Avatar Osita">
+                <!-- Partículas mágicas (JS las creará aquí) -->
+                <div id="fireflies-layer"></div>
                 <div id="nodes-container"></div>
             </div>
         </section>
 
         <!-- PANTALLA 3: LA PREGUNTA -->
         <section id="screen-game-question" class="screen flex-col w-full glass-panel p-6 md:p-10 relative overflow-hidden">
-            <!-- Botón Casa y Volver Mapa -->
             <button onclick="navTo('screen-map')" class="absolute top-6 left-6 text-gray-400 hover:text-white z-10 transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Mapa</button>
             <button onclick="navTo('screen-home')" class="absolute top-6 right-6 text-pink-400 hover:text-pink-300 z-50"><i class="fa-solid fa-house text-2xl"></i></button>
             
@@ -309,7 +351,7 @@
             </button>
         </section>
 
-        <!-- PANTALLA 4: CARGA FINAL (ÉXITO) -->
+        <!-- PANTALLA 4: CARGA FINAL -->
         <section id="screen-loading-final" class="screen flex-col items-center justify-center text-center">
             <div class="glass-panel p-10 rounded-[40px] max-w-md w-full border-pink-500/50">
                 <div class="spinner mb-8"></div>
@@ -327,7 +369,6 @@
         <section id="screen-final-story" class="screen flex-col items-center justify-center text-center w-full relative">
             <button onclick="navTo('screen-home')" class="absolute top-4 right-4 text-pink-400 hover:text-pink-300 z-50 p-2"><i class="fa-solid fa-house text-2xl"></i></button>
             
-            <!-- Contenedor de las Tarjetas Fotográficas -->
             <div id="photos-section" class="w-full max-w-md mx-auto">
                 <h3 class="text-pink-400 font-bold tracking-widest uppercase text-sm mb-6">Nuestra Historia</h3>
                 <div class="polaroid-frame mb-8 relative" id="photo-wrapper">
@@ -340,11 +381,8 @@
                 </button>
             </div>
 
-            <!-- Contenedor de la Carta Final (Con Corazón Neón de Fondo) -->
             <div id="letter-section" class="hidden w-full max-w-lg mx-auto glass-panel letter-container p-8 md:p-12 rounded-[40px]">
-                <!-- Corazón Gigante Neón -->
                 <i class="fa-solid fa-heart neon-heart-bg"></i>
-                
                 <i class="fa-solid fa-envelope-open-text text-5xl text-pink-400 mb-6 drop-shadow-md relative z-10"></i>
                 
                 <div class="text-left text-lg md:text-xl letter-text space-y-6">
@@ -408,7 +446,7 @@
             { type: 'choice', question: '¿Quién le escribió primero al otro?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Me encantó que lo hicieras!' },
             { type: 'choice', question: '¿Quién es más puntual?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Siempre a tiempo, lo acepto!' },
             { type: 'choice', question: '¿Cuál fue la fecha en la que empezamos nuestra relación?', options: ['12/10/2026', '12/09/2026', '12/08/2026', '12/11/2026'], answer: '12/09/2026', msg: '¡El inicio de nuestra magia!' },
-            { type: 'choice', question: '¿Dónde nos vimos por primera vez?', options: ['Droguería', 'Supermercado', 'Al frente de la Iglesia', 'Parque'], answer: 'Droguería', msg: '¡Ahí cruzamos miradas!' },
+            { type: 'choice', question: '¿Dónde nos vimos por primera vez?', options: ['Droguería', 'Supermercado', 'Al frente de la Iglesia', 'Parque'], answer: 'Al frente de la Iglesia', msg: '¡Ahí cruzamos miradas!' },
             { type: 'choice', question: '¿Cuál fue el primer regalo que te di?', options: ['Totoro', 'Babuchas', 'Chocolatina Jumbo', 'Chocolatina Jumbon´t'], answer: 'Totoro', msg: '¡Espero que aún lo abraces!' },
             { type: 'choice', question: '¿Cuál fue el primer apodo cariñoso que usamos?', options: ['Cuchurrumi', 'Ositos', 'Los lobos', 'W Y griega'], answer: 'Ositos', msg: '¡Mis ositos!' },
             { type: 'choice', question: '¿Qué es lo que más me gusta hacer en mi tiempo libre?', options: ['Entrenar', 'Hacer Ejercicio', 'Practicar Deporte', 'Caminar'], answer: 'Hacer Ejercicio', msg: '¡A ponernos fuertes juntos!' },
@@ -444,6 +482,7 @@
         let attemptsLeft = 3;
         let cheatClicks = 0; 
         let currentPhotoIndex = 0;
+        let firefliesCreated = false;
 
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
@@ -458,7 +497,20 @@
             }, 500);
         }
 
-        // --- CÓDIGO SECRETO (6 Toques a la palabra "Amor") ---
+        function createFireflies() {
+            if (firefliesCreated) return;
+            const layer = document.getElementById('fireflies-layer');
+            for(let i=0; i<15; i++) {
+                let fly = document.createElement('div');
+                fly.className = 'firefly';
+                fly.style.left = Math.random() * 100 + '%';
+                fly.style.top = Math.random() * 100 + '%';
+                fly.style.animationDelay = (Math.random() * 5) + 's';
+                layer.appendChild(fly);
+            }
+            firefliesCreated = true;
+        }
+
         function cheatCode() {
             cheatClicks++;
             if(cheatClicks >= 6) {
@@ -474,6 +526,7 @@
         function enterMapWorld() {
             navTo('screen-map');
             buildMap();
+            createFireflies();
             setTimeout(() => updateOsitaPosition(0), 600); 
         }
 
@@ -642,29 +695,25 @@
             }
         }
 
-        // --- GLITCH AL TERMINAR LA AVENTURA ---
         function triggerGlitchAndFinish() {
             document.body.classList.add('glitch-screen');
             setTimeout(() => {
                 document.body.classList.remove('glitch-screen');
                 restartGame();
                 navTo('screen-home');
-            }, 1200); // El glitch dura 1.2 segundos y reinicia al Home
+            }, 1500);
         }
 
-        // --- LÓGICA DE GAME OVER Y ERRORES ---
         function handleWrong() {
             attemptsLeft--; 
             renderLivesUI();
             const input = document.getElementById('answer-input'); if (input) { input.value = ''; input.focus(); }
             
             if (attemptsLeft <= 0) {
-                // GAME OVER
                 const overlay = document.getElementById('game-over-overlay');
                 overlay.style.display = 'flex';
                 setTimeout(() => overlay.style.opacity = '1', 10);
             } else {
-                // MENSAJE TIERNO DE ERROR
                 document.getElementById('lives-left-text').textContent = attemptsLeft;
                 const overlay = document.getElementById('wrong-answer-overlay');
                 overlay.style.display = 'flex';
@@ -692,7 +741,6 @@
             const overlay = document.getElementById('game-over-overlay');
             overlay.style.opacity = '0';
             
-            // Reiniciar también los divs de la historia por si acaso
             document.getElementById('photos-section').style.display = 'block';
             document.getElementById('letter-section').classList.add('hidden');
             
