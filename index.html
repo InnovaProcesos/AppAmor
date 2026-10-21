@@ -175,16 +175,16 @@
             
             <div class="flex justify-center items-center gap-6 mb-8">
                 <div class="flex flex-col items-center animate-float-reverse">
-                    <!-- Avatar Yeison -->
-                    <img src="https://drive.google.com/uc?export=view&id=1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Yeison">
+                    <!-- Avatar Yeison con enlace directo -->
+                    <img src="https://lh3.googleusercontent.com/d/1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Yeison">
                     <span class="mt-3 text-sm text-blue-300 font-bold bg-blue-900/40 px-4 py-1 rounded-full">Yeison</span>
                 </div>
                 
                 <div class="text-5xl text-pink-500 heartbeat mt-[-20px]">💖</div>
                 
                 <div class="flex flex-col items-center animate-float">
-                    <!-- Avatar Valentina -->
-                    <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="avatar-img" alt="Valentina">
+                    <!-- Avatar Valentina con enlace directo -->
+                    <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="avatar-img" alt="Valentina">
                     <span class="mt-3 text-sm text-pink-300 font-bold bg-pink-900/40 px-4 py-1 rounded-full">Valen</span>
                 </div>
             </div>
@@ -205,7 +205,8 @@
 
         <!-- PANTALLA 2: EL MAPA DE 14 NIVELES -->
         <section id="screen-map" class="screen flex-col items-center justify-center">
-            <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider">La Isla de Nuestro Amor</h2>
+            <!-- AQUÍ ESTÁ EL TRUCO: onclick="cheatCode()" -->
+            <h2 onclick="cheatCode()" class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider cursor-pointer">La Isla de Nuestro Amor</h2>
             <p class="text-sm text-gray-400 mb-6 font-light">Llega al final sin perder todas tus vidas</p>
             
             <div class="island-container glass-panel" id="map-container">
@@ -213,7 +214,7 @@
                     <polyline id="path-line" fill="none" stroke="rgba(236,72,153,0.5)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
                 </svg>
 
-                <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" id="map-avatar" alt="Avatar Osita">
+                <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" id="map-avatar" alt="Avatar Osita">
 
                 <div id="nodes-container"></div>
             </div>
@@ -246,9 +247,9 @@
                 <h2 class="text-3xl title-font text-pink-400 mb-4">¡Reto Superado!</h2>
                 <p class="text-gray-300 text-lg font-light animate-pulse">Cargando tu recompensa especial...<br>Preparando detalles mágicos...</p>
                 <div class="mt-8 flex justify-center gap-4">
-                    <img src="https://drive.google.com/uc?export=view&id=1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="w-16 h-16 rounded-full border-2 border-white object-cover">
+                    <img src="https://lh3.googleusercontent.com/d/1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="w-16 h-16 rounded-full border-2 border-white object-cover">
                     <div class="text-3xl text-pink-500 mt-2 heartbeat">💖</div>
-                    <img src="https://drive.google.com/uc?export=view&id=1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="w-16 h-16 rounded-full border-2 border-white object-cover">
+                    <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="w-16 h-16 rounded-full border-2 border-white object-cover">
                 </div>
             </div>
         </section>
@@ -297,7 +298,6 @@
             { type: 'text', question: 'Completa la frase .. Te Amo _____', answer: 'infinito', msg: '¡Hacia la recompensa final!' }
         ];
 
-        // Coordenadas de los 14 puntos en el mapa (ZIGZAG de abajo hacia arriba)
         const mapCoordinates = [
             { x: 15, y: 90 }, { x: 45, y: 85 }, { x: 75, y: 90 }, // 1, 2, 3
             { x: 85, y: 70 }, { x: 55, y: 65 }, { x: 25, y: 70 }, // 4, 5, 6
@@ -309,6 +309,7 @@
         let currentLevelIndex = 0; 
         let unlockedLevel = 0;     
         let attemptsLeft = 3;
+        let cheatClicks = 0; // Variable para el truco
 
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
@@ -321,6 +322,17 @@
                 void target.offsetWidth; 
                 target.classList.add('active');
             }, 500);
+        }
+
+        // --- CÓDIGO SECRETO ---
+        function cheatCode() {
+            cheatClicks++;
+            if(cheatClicks >= 3) {
+                unlockedLevel = 13; // Desbloquea hasta el nivel 14
+                buildMap();
+                updateOsitaPosition(13);
+                cheatClicks = 0;
+            }
         }
 
         function enterMapWorld() {
@@ -440,10 +452,8 @@
             setTimeout(() => {
                 overlay.style.display = 'none';
                 
-                // Incrementar nivel si es la primera vez que lo pasa
                 if (unlockedLevel === currentLevelIndex) unlockedLevel++;
                 
-                // Si acaba de pasar el nivel 14 (índice 13), va a la pantalla final
                 if (unlockedLevel === 14) {
                     navTo('screen-loading-final');
                 } else {
@@ -461,7 +471,6 @@
             renderLivesUI();
             const input = document.getElementById('answer-input'); if (input) { input.value = ''; input.focus(); }
             
-            // LÓGICA DE GAME OVER (Muerte Súbita)
             if (attemptsLeft <= 0) {
                 const overlay = document.getElementById('game-over-overlay');
                 overlay.style.display = 'flex';
@@ -470,12 +479,10 @@
         }
 
         function restartGame() {
-            // Reiniciar Valores
             unlockedLevel = 0;
             currentLevelIndex = 0;
             attemptsLeft = 3;
             
-            // Ocultar Overlay
             const overlay = document.getElementById('game-over-overlay');
             overlay.style.opacity = '0';
             
