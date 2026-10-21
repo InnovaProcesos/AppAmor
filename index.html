@@ -49,7 +49,7 @@
             display: none;
             opacity: 0;
             transform: scale(0.95);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
         }
         .screen.active {
@@ -159,11 +159,48 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Estilos Tarjetas y Carta Final */
+        .polaroid-frame {
+            background: white;
+            padding: 15px 15px 30px 15px;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: rotate(-2deg);
+            transition: all 0.5s ease;
+        }
+        .polaroid-frame:hover { transform: rotate(0deg) scale(1.02); }
+        .polaroid-img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #eee;
+        }
+        .photo-fade {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .letter-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        .letter-text {
+            font-family: 'Pacifico', cursive;
+            line-height: 1.8;
+            color: #fbcfe8;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
         <div class="absolute top-10 left-10 w-32 h-32 bg-pink-600 rounded-full mix-blend-screen filter blur-[50px] animate-pulse"></div>
         <div class="absolute bottom-10 right-10 w-40 h-40 bg-purple-600 rounded-full mix-blend-screen filter blur-[60px] animate-pulse" style="animation-delay: 2s;"></div>
     </div>
@@ -172,18 +209,13 @@
 
         <!-- PANTALLA 1: INICIO ELEGANTE -->
         <section id="screen-home" class="screen active flex-col items-center justify-center text-center">
-            
             <div class="flex justify-center items-center gap-6 mb-8">
                 <div class="flex flex-col items-center animate-float-reverse">
-                    <!-- Avatar Yeison con enlace directo -->
                     <img src="https://lh3.googleusercontent.com/d/1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Yeison">
                     <span class="mt-3 text-sm text-blue-300 font-bold bg-blue-900/40 px-4 py-1 rounded-full">Yeison</span>
                 </div>
-                
                 <div class="text-5xl text-pink-500 heartbeat mt-[-20px]">💖</div>
-                
                 <div class="flex flex-col items-center animate-float">
-                    <!-- Avatar Valentina con enlace directo -->
                     <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" class="avatar-img" alt="Valentina">
                     <span class="mt-3 text-sm text-pink-300 font-bold bg-pink-900/40 px-4 py-1 rounded-full">Valen</span>
                 </div>
@@ -205,17 +237,15 @@
 
         <!-- PANTALLA 2: EL MAPA DE 14 NIVELES -->
         <section id="screen-map" class="screen flex-col items-center justify-center">
-            <!-- AQUÍ ESTÁ EL TRUCO: onclick="cheatCode()" -->
-            <h2 onclick="cheatCode()" class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider cursor-pointer">La Isla de Nuestro Amor</h2>
+            <!-- TRUCO: Solo la palabra "Amor" es cliqueable para saltar -->
+            <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider">La Isla de Nuestro <span onclick="cheatCode()" class="cursor-default">Amor</span></h2>
             <p class="text-sm text-gray-400 mb-6 font-light">Llega al final sin perder todas tus vidas</p>
             
             <div class="island-container glass-panel" id="map-container">
                 <svg class="map-path" width="100%" height="100%">
                     <polyline id="path-line" fill="none" stroke="rgba(236,72,153,0.5)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
                 </svg>
-
                 <img src="https://lh3.googleusercontent.com/d/1EaiJYbn2yv_96D-CFUWjqDkZAhMsNED_" id="map-avatar" alt="Avatar Osita">
-
                 <div id="nodes-container"></div>
             </div>
         </section>
@@ -245,7 +275,7 @@
             <div class="glass-panel p-10 rounded-[40px] max-w-md w-full border-pink-500/50">
                 <div class="spinner mb-8"></div>
                 <h2 class="text-3xl title-font text-pink-400 mb-4">¡Reto Superado!</h2>
-                <p class="text-gray-300 text-lg font-light animate-pulse">Cargando tu recompensa especial...<br>Preparando detalles mágicos...</p>
+                <p class="text-gray-300 text-lg font-light animate-pulse">Desbloqueando nuestros recuerdos...<br>Preparando detalles mágicos...</p>
                 <div class="mt-8 flex justify-center gap-4">
                     <img src="https://lh3.googleusercontent.com/d/1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="w-16 h-16 rounded-full border-2 border-white object-cover">
                     <div class="text-3xl text-pink-500 mt-2 heartbeat">💖</div>
@@ -254,18 +284,43 @@
             </div>
         </section>
 
-
-        <!-- Modal de Nivel Superado -->
-        <div id="level-passed-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeLevelPassedOverlay()">
-            <div class="bg-white p-8 rounded-2xl text-center shadow-2xl max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="passed-content">
-                <i class="fa-solid fa-star text-6xl text-yellow-400 mb-4 animate-spin-slow"></i>
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Correcto!</h2>
-                <p class="text-gray-600 mb-6" id="passed-msg">¡La osita avanza!</p>
-                <p class="text-xs text-pink-500 font-bold uppercase tracking-widest animate-pulse">Toca para continuar</p>
+        <!-- PANTALLA 5: HISTORIA Y FOTOS FINALES -->
+        <section id="screen-final-story" class="screen flex-col items-center justify-center text-center w-full">
+            
+            <!-- Contenedor de las Tarjetas Fotográficas -->
+            <div id="photos-section" class="w-full max-w-md mx-auto">
+                <h3 class="text-pink-400 font-bold tracking-widest uppercase text-sm mb-6">Nuestra Historia</h3>
+                <div class="polaroid-frame mb-8 relative" id="photo-wrapper">
+                    <img id="story-img" src="" class="polaroid-img">
+                </div>
+                <p id="story-text" class="text-xl md:text-2xl text-gray-200 font-light italic min-h-[80px] leading-relaxed px-4"></p>
+                
+                <button onclick="nextStoryPhoto()" class="mt-6 w-full bg-gradient-to-r from-pink-600 to-purple-600 font-bold py-4 rounded-xl shadow-lg hover:shadow-pink-500/30 transition-all text-lg">
+                    Siguiente Recuerdo <i class="fa-solid fa-angle-right ml-2"></i>
+                </button>
             </div>
-        </div>
 
-        <!-- Modal de GAME OVER -->
+            <!-- Contenedor de la Carta Final (Oculto al inicio) -->
+            <div id="letter-section" class="hidden w-full max-w-lg mx-auto glass-panel letter-container p-8 md:p-12 rounded-[40px]">
+                <i class="fa-solid fa-envelope-open-text text-5xl text-pink-400 mb-6 drop-shadow-md"></i>
+                <h2 class="text-4xl title-font text-white mb-8">Para mi amada Valen</h2>
+                
+                <div class="text-left text-lg md:text-xl letter-text space-y-6">
+                    <p>Mi pequeña osita hermosa,</p>
+                    <p>Si estás leyendo esto, es porque has recorrido paso a paso la isla de nuestra historia. Cada pregunta, cada respuesta y cada recuerdo en esas fotos son la prueba de lo mágico que es tenerte en mi vida.</p>
+                    <p>Desde el primer momento en que te vi, supe que había encontrado a alguien excepcional. Gracias por tu sonrisa, por tu dulzura y por hacerme el lobito más afortunado del universo.</p>
+                    <p>No importa qué aventuras nos depare el futuro, mi mayor premio siempre será caminar de tu mano.</p>
+                    <p class="text-center text-2xl mt-8 font-bold text-pink-400">Te amo al infinito y más allá. ❤️</p>
+                </div>
+                
+                <button onclick="confettiShower()" class="mt-10 bg-white/10 hover:bg-white/20 border border-pink-400 text-pink-300 font-bold py-3 px-8 rounded-full transition-all">
+                    Terminar Aventura
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Modal de Game Over -->
         <div id="game-over-overlay" class="fixed inset-0 bg-red-950/90 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300">
             <div class="bg-black/80 p-8 rounded-3xl text-center shadow-2xl max-w-sm mx-4 border border-red-500/50">
                 <i class="fa-solid fa-heart-crack text-6xl text-red-500 mb-4 heartbeat"></i>
@@ -276,11 +331,20 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Modal Superado Normal -->
+        <div id="level-passed-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeLevelPassedOverlay()">
+            <div class="bg-white p-8 rounded-2xl text-center shadow-2xl max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="passed-content">
+                <i class="fa-solid fa-star text-6xl text-yellow-400 mb-4 animate-spin-slow"></i>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Correcto!</h2>
+                <p class="text-gray-600 mb-6" id="passed-msg">¡La osita avanza!</p>
+                <p class="text-xs text-pink-500 font-bold uppercase tracking-widest animate-pulse">Toca para continuar</p>
+            </div>
+        </div>
 
     </div>
 
     <script>
-        // TUS 14 PREGUNTAS Y RESPUESTAS
         const gameLevels = [
             { type: 'choice', question: '¿Dónde fue nuestro primer beso?', options: ['Al frente de la Clinica', 'En una panadería', 'En una Cafetería', 'Mientras estabamos en la moto'], answer: 'Al frente de la Clinica', msg: '¡Nunca lo olvidaré!' },
             { type: 'choice', question: '¿Quién dijo “te amo” primero?', options: ['Valentina', 'Yeison'], answer: 'Valentina', msg: '¡Mi osita enamorada!' },
@@ -299,17 +363,31 @@
         ];
 
         const mapCoordinates = [
-            { x: 15, y: 90 }, { x: 45, y: 85 }, { x: 75, y: 90 }, // 1, 2, 3
-            { x: 85, y: 70 }, { x: 55, y: 65 }, { x: 25, y: 70 }, // 4, 5, 6
-            { x: 15, y: 50 }, { x: 45, y: 45 }, { x: 75, y: 50 }, // 7, 8, 9
-            { x: 85, y: 30 }, { x: 55, y: 25 }, { x: 25, y: 30 }, // 10, 11, 12
-            { x: 35, y: 10 }, { x: 70, y: 10 }                    // 13, 14 (Llegada)
+            { x: 15, y: 90 }, { x: 45, y: 85 }, { x: 75, y: 90 },
+            { x: 85, y: 70 }, { x: 55, y: 65 }, { x: 25, y: 70 },
+            { x: 15, y: 50 }, { x: 45, y: 45 }, { x: 75, y: 50 },
+            { x: 85, y: 30 }, { x: 55, y: 25 }, { x: 25, y: 30 },
+            { x: 35, y: 10 }, { x: 70, y: 10 }
+        ];
+
+        // --- HISTORIA FINAL CON LAS 9 FOTOS ---
+        const storyData = [
+            { img: "https://lh3.googleusercontent.com/d/1MTCve1EThrwKRPIzeARiEMps1lPSgdbg", text: "1. Todo comenzó con miradas cómplices y sonrisas tímidas..." },
+            { img: "https://lh3.googleusercontent.com/d/11ydQBlHwVSZD_ZxyPfQ1Iy5iDS62KJ5M", text: "2. Poco a poco, te convertiste en mi lugar favorito y mi mayor paz..." },
+            { img: "https://lh3.googleusercontent.com/d/1rgVH_tIY8EXeHvDiuMxTzUDHA6TT725E", text: "3. Cada aventura juntos se volvió un tesoro en mi memoria..." },
+            { img: "https://lh3.googleusercontent.com/d/1ETPSSddz_kYpMy-WsKxGJ14w0cS54fTf", text: "4. Me enseñaste que el amor real se construye en los pequeños detalles..." },
+            { img: "https://lh3.googleusercontent.com/d/1jYO4KGb9GRR7rloPJMarvmV2SEmmgl_v", text: "5. Amo la forma en que el mundo se detiene cuando estamos tan cerquita..." },
+            { img: "https://lh3.googleusercontent.com/d/1nc4H9EsOp_K_HZEvYbRG7ySNlshunZZy", text: "6. Y cómo hasta el día más gris se ilumina cuando escucho tu risa..." },
+            { img: "https://lh3.googleusercontent.com/d/1xNGIIcwv6ZfMT6kSJRkGsGqJd2ZviIjf", text: "7. No importa a dónde vayamos, mi hogar siempre será a tu lado..." },
+            { img: "https://lh3.googleusercontent.com/d/1YBp-7QrEmNuJDKpkdlD4BHROQ6oruXRa", text: "8. Hemos crecido, hemos soñado, y nos hemos amado sin medida..." },
+            { img: "https://lh3.googleusercontent.com/d/1VQfbeR8NzDB_SW5DZzaCSXr0rvdy4NP4", text: "9. Y esto, mi osita hermosa, es solo el comienzo de nuestra historia para siempre." }
         ];
 
         let currentLevelIndex = 0; 
         let unlockedLevel = 0;     
         let attemptsLeft = 3;
-        let cheatClicks = 0; // Variable para el truco
+        let cheatClicks = 0; 
+        let currentPhotoIndex = 0;
 
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
@@ -324,15 +402,18 @@
             }, 500);
         }
 
-        // --- CÓDIGO SECRETO ---
+        // --- CÓDIGO SECRETO ACTUALIZADO ---
         function cheatCode() {
             cheatClicks++;
-            if(cheatClicks >= 3) {
-                unlockedLevel = 13; // Desbloquea hasta el nivel 14
+            if(cheatClicks >= 6) {
+                unlockedLevel = 13; // Desbloquea hasta el último nivel (Nivel 14)
                 buildMap();
                 updateOsitaPosition(13);
                 cheatClicks = 0;
             }
+            // Reinicia los clics si pasa más de 2 segundos sin tocar
+            clearTimeout(window.cheatTimer);
+            window.cheatTimer = setTimeout(() => { cheatClicks = 0; }, 2000);
         }
 
         function enterMapWorld() {
@@ -455,7 +536,7 @@
                 if (unlockedLevel === currentLevelIndex) unlockedLevel++;
                 
                 if (unlockedLevel === 14) {
-                    navTo('screen-loading-final');
+                    triggerFinalSequence();
                 } else {
                     navTo('screen-map');
                     setTimeout(() => {
@@ -466,6 +547,60 @@
             }, 300);
         }
 
+        function triggerFinalSequence() {
+            navTo('screen-loading-final');
+            // Carga la primera foto de la historia
+            currentPhotoIndex = 0;
+            loadStoryContent();
+            
+            // Simula tiempo de carga 4.5 segundos y luego muestra la historia
+            setTimeout(() => {
+                navTo('screen-final-story');
+            }, 4500);
+        }
+
+        // --- LÓGICA DE FOTOS Y CARTA FINAL ---
+        function loadStoryContent() {
+            const imgEl = document.getElementById('story-img');
+            const txtEl = document.getElementById('story-text');
+            const wrapper = document.getElementById('photo-wrapper');
+            
+            // Efecto de desvanecimiento entre fotos
+            imgEl.classList.remove('photo-fade');
+            void imgEl.offsetWidth; // reset anim
+            
+            imgEl.src = storyData[currentPhotoIndex].img;
+            txtEl.textContent = storyData[currentPhotoIndex].text;
+            imgEl.classList.add('photo-fade');
+        }
+
+        function nextStoryPhoto() {
+            currentPhotoIndex++;
+            if (currentPhotoIndex < storyData.length) {
+                loadStoryContent();
+            } else {
+                // Terminan las 9 fotos, ocultar sección de fotos y mostrar la Carta
+                document.getElementById('photos-section').style.display = 'none';
+                
+                const letter = document.getElementById('letter-section');
+                letter.classList.remove('hidden');
+                // Efecto de entrada suave para la carta
+                letter.style.opacity = '0';
+                letter.style.transform = 'translateY(20px)';
+                letter.style.transition = 'all 1s ease';
+                setTimeout(() => {
+                    letter.style.opacity = '1';
+                    letter.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        }
+
+        function confettiShower() {
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
+        }
+
+
+        // --- LÓGICA DE GAME OVER ---
         function handleWrong() {
             attemptsLeft--; 
             renderLivesUI();
