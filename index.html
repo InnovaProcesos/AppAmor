@@ -45,6 +45,38 @@
             50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,105,180,0.8)); }
         }
 
+        /* EFECTO NEÓN PARA EL CORAZÓN DE LA CARTA */
+        .neon-heart-bg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20rem;
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(255, 20, 147, 0.3);
+            text-shadow: 0 0 20px rgba(255, 20, 147, 0.4), 0 0 40px rgba(255, 20, 147, 0.2), 0 0 80px rgba(255, 20, 147, 0.1);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-neon 2s infinite alternate;
+        }
+        @keyframes pulse-neon {
+            from { text-shadow: 0 0 20px rgba(255,20,147,0.4), 0 0 40px rgba(255,20,147,0.2); transform: translate(-50%, -50%) scale(1); }
+            to { text-shadow: 0 0 40px rgba(255,20,147,0.8), 0 0 80px rgba(255,20,147,0.6); transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        /* EFECTO GLITCH AL TERMINAR */
+        .glitch-screen {
+            animation: glitch-anim 0.2s infinite;
+            filter: contrast(200%) saturate(200%) hue-rotate(90deg) invert(10%);
+        }
+        @keyframes glitch-anim {
+            0% { transform: translate(-5px, 2px); }
+            20% { transform: translate(5px, -5px) scale(1.02); }
+            40% { transform: translate(-5px, 5px) skewX(2deg); }
+            60% { transform: translate(5px, 2px) scale(0.98); }
+            80% { transform: translate(-2px, -5px) skewX(-2deg); }
+            100% { transform: translate(2px, 5px); }
+        }
+
         .screen {
             display: none;
             opacity: 0;
@@ -188,12 +220,15 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            overflow: hidden;
         }
         .letter-text {
             font-family: 'Pacifico', cursive;
             line-height: 1.8;
             color: #fbcfe8;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
         }
 
     </style>
@@ -208,7 +243,7 @@
     <div class="container mx-auto px-4 relative z-10 w-full max-w-3xl min-h-screen flex flex-col justify-center py-10">
 
         <!-- PANTALLA 1: INICIO ELEGANTE -->
-        <section id="screen-home" class="screen active flex-col items-center justify-center text-center">
+        <section id="screen-home" class="screen active flex-col items-center justify-center text-center relative">
             <div class="flex justify-center items-center gap-6 mb-8">
                 <div class="flex flex-col items-center animate-float-reverse">
                     <img src="https://lh3.googleusercontent.com/d/1pnDwC9NIJ2iitDNRS_NwrIoDDMMreLqz" class="avatar-img border-blue-400 shadow-blue-500/50" alt="Yeison">
@@ -236,8 +271,10 @@
         </section>
 
         <!-- PANTALLA 2: EL MAPA DE 14 NIVELES -->
-        <section id="screen-map" class="screen flex-col items-center justify-center">
-            <!-- TRUCO: Solo la palabra "Amor" es cliqueable para saltar -->
+        <section id="screen-map" class="screen flex-col items-center justify-center relative">
+            <!-- Botón Home Superior Derecho -->
+            <button onclick="navTo('screen-home')" class="absolute top-2 right-2 text-pink-400 hover:text-pink-300 z-50 p-2"><i class="fa-solid fa-house text-2xl"></i></button>
+
             <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md tracking-wider">La Isla de Nuestro <span onclick="cheatCode()" class="cursor-default">Amor</span></h2>
             <p class="text-sm text-gray-400 mb-6 font-light">Llega al final sin perder todas tus vidas</p>
             
@@ -252,7 +289,9 @@
 
         <!-- PANTALLA 3: LA PREGUNTA -->
         <section id="screen-game-question" class="screen flex-col w-full glass-panel p-6 md:p-10 relative overflow-hidden">
+            <!-- Botón Casa y Volver Mapa -->
             <button onclick="navTo('screen-map')" class="absolute top-6 left-6 text-gray-400 hover:text-white z-10 transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Mapa</button>
+            <button onclick="navTo('screen-home')" class="absolute top-6 right-6 text-pink-400 hover:text-pink-300 z-50"><i class="fa-solid fa-house text-2xl"></i></button>
             
             <div class="flex justify-between items-center mb-8 mt-6 border-b border-white/10 pb-4">
                 <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-sm bg-pink-900/30 px-5 py-2 rounded-full">Nivel 1</span>
@@ -284,8 +323,9 @@
             </div>
         </section>
 
-        <!-- PANTALLA 5: HISTORIA Y FOTOS FINALES -->
-        <section id="screen-final-story" class="screen flex-col items-center justify-center text-center w-full">
+        <!-- PANTALLA 5: HISTORIA Y CARTA FINAL -->
+        <section id="screen-final-story" class="screen flex-col items-center justify-center text-center w-full relative">
+            <button onclick="navTo('screen-home')" class="absolute top-4 right-4 text-pink-400 hover:text-pink-300 z-50 p-2"><i class="fa-solid fa-house text-2xl"></i></button>
             
             <!-- Contenedor de las Tarjetas Fotográficas -->
             <div id="photos-section" class="w-full max-w-md mx-auto">
@@ -300,10 +340,12 @@
                 </button>
             </div>
 
-            <!-- Contenedor de la Carta Final (Oculto al inicio) -->
+            <!-- Contenedor de la Carta Final (Con Corazón Neón de Fondo) -->
             <div id="letter-section" class="hidden w-full max-w-lg mx-auto glass-panel letter-container p-8 md:p-12 rounded-[40px]">
-                <i class="fa-solid fa-envelope-open-text text-5xl text-pink-400 mb-6 drop-shadow-md"></i>
-                <h2 class="text-4xl title-font text-white mb-8">Para mi amada Valen</h2>
+                <!-- Corazón Gigante Neón -->
+                <i class="fa-solid fa-heart neon-heart-bg"></i>
+                
+                <i class="fa-solid fa-envelope-open-text text-5xl text-pink-400 mb-6 drop-shadow-md relative z-10"></i>
                 
                 <div class="text-left text-lg md:text-xl letter-text space-y-6">
                     <p>Mi pequeña osita hermosa,</p>
@@ -313,12 +355,27 @@
                     <p class="text-center text-2xl mt-8 font-bold text-pink-400">Te amo al infinito y más allá. ❤️</p>
                 </div>
                 
-                <button onclick="confettiShower()" class="mt-10 bg-white/10 hover:bg-white/20 border border-pink-400 text-pink-300 font-bold py-3 px-8 rounded-full transition-all">
+                <button onclick="triggerGlitchAndFinish()" class="mt-10 bg-transparent border border-pink-500 hover:bg-pink-900/30 text-pink-300 font-bold py-3 px-8 rounded-full transition-all relative z-10 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
                     Terminar Aventura
                 </button>
             </div>
-
         </section>
+
+        <!-- Modal Tierno de Error (Vidas) -->
+        <div id="wrong-answer-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300">
+            <div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm mx-4 transform scale-95 transition-transform duration-300" id="wrong-content">
+                <i class="fa-solid fa-face-sad-tear text-6xl text-pink-400 mb-4 animate-bounce"></i>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Ayñ, osita! 🥺</h2>
+                <p class="text-gray-600 mb-4" id="wrong-msg">Esa no era la respuesta correcta...</p>
+                <div class="bg-pink-50 text-pink-800 rounded-xl p-4 mb-6 text-sm font-bold border border-pink-200 shadow-inner">
+                    Te quedan <span id="lives-left-text" class="text-2xl text-pink-600"></span> vidas.<br>
+                    <span class="font-normal text-xs text-gray-500 mt-2 block">Recuerda que si pierdes las 3, el lobito llorará y te regresará al inicio de la historia.</span>
+                </div>
+                <button onclick="closeWrongOverlay()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg">
+                    ¡Lo intentaré de nuevo!
+                </button>
+            </div>
+        </div>
 
         <!-- Modal de Game Over -->
         <div id="game-over-overlay" class="fixed inset-0 bg-red-950/90 z-50 hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300">
@@ -370,7 +427,6 @@
             { x: 35, y: 10 }, { x: 70, y: 10 }
         ];
 
-        // --- HISTORIA FINAL CON LAS 9 FOTOS ---
         const storyData = [
             { img: "https://lh3.googleusercontent.com/d/1MTCve1EThrwKRPIzeARiEMps1lPSgdbg", text: "1. Todo comenzó con miradas cómplices y sonrisas tímidas..." },
             { img: "https://lh3.googleusercontent.com/d/11ydQBlHwVSZD_ZxyPfQ1Iy5iDS62KJ5M", text: "2. Poco a poco, te convertiste en mi lugar favorito y mi mayor paz..." },
@@ -402,16 +458,15 @@
             }, 500);
         }
 
-        // --- CÓDIGO SECRETO ACTUALIZADO ---
+        // --- CÓDIGO SECRETO (6 Toques a la palabra "Amor") ---
         function cheatCode() {
             cheatClicks++;
             if(cheatClicks >= 6) {
-                unlockedLevel = 13; // Desbloquea hasta el último nivel (Nivel 14)
+                unlockedLevel = 13; 
                 buildMap();
                 updateOsitaPosition(13);
                 cheatClicks = 0;
             }
-            // Reinicia los clics si pasa más de 2 segundos sin tocar
             clearTimeout(window.cheatTimer);
             window.cheatTimer = setTimeout(() => { cheatClicks = 0; }, 2000);
         }
@@ -549,25 +604,20 @@
 
         function triggerFinalSequence() {
             navTo('screen-loading-final');
-            // Carga la primera foto de la historia
             currentPhotoIndex = 0;
             loadStoryContent();
             
-            // Simula tiempo de carga 4.5 segundos y luego muestra la historia
             setTimeout(() => {
                 navTo('screen-final-story');
             }, 4500);
         }
 
-        // --- LÓGICA DE FOTOS Y CARTA FINAL ---
         function loadStoryContent() {
             const imgEl = document.getElementById('story-img');
             const txtEl = document.getElementById('story-text');
-            const wrapper = document.getElementById('photo-wrapper');
             
-            // Efecto de desvanecimiento entre fotos
             imgEl.classList.remove('photo-fade');
-            void imgEl.offsetWidth; // reset anim
+            void imgEl.offsetWidth; 
             
             imgEl.src = storyData[currentPhotoIndex].img;
             txtEl.textContent = storyData[currentPhotoIndex].text;
@@ -579,12 +629,9 @@
             if (currentPhotoIndex < storyData.length) {
                 loadStoryContent();
             } else {
-                // Terminan las 9 fotos, ocultar sección de fotos y mostrar la Carta
                 document.getElementById('photos-section').style.display = 'none';
-                
                 const letter = document.getElementById('letter-section');
                 letter.classList.remove('hidden');
-                // Efecto de entrada suave para la carta
                 letter.style.opacity = '0';
                 letter.style.transform = 'translateY(20px)';
                 letter.style.transition = 'all 1s ease';
@@ -595,22 +642,46 @@
             }
         }
 
-        function confettiShower() {
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
+        // --- GLITCH AL TERMINAR LA AVENTURA ---
+        function triggerGlitchAndFinish() {
+            document.body.classList.add('glitch-screen');
+            setTimeout(() => {
+                document.body.classList.remove('glitch-screen');
+                restartGame();
+                navTo('screen-home');
+            }, 1200); // El glitch dura 1.2 segundos y reinicia al Home
         }
 
-
-        // --- LÓGICA DE GAME OVER ---
+        // --- LÓGICA DE GAME OVER Y ERRORES ---
         function handleWrong() {
             attemptsLeft--; 
             renderLivesUI();
             const input = document.getElementById('answer-input'); if (input) { input.value = ''; input.focus(); }
             
             if (attemptsLeft <= 0) {
+                // GAME OVER
                 const overlay = document.getElementById('game-over-overlay');
                 overlay.style.display = 'flex';
                 setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                // MENSAJE TIERNO DE ERROR
+                document.getElementById('lives-left-text').textContent = attemptsLeft;
+                const overlay = document.getElementById('wrong-answer-overlay');
+                overlay.style.display = 'flex';
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    document.getElementById('wrong-content').style.transform = 'scale(1)';
+                }, 10);
             }
+        }
+
+        function closeWrongOverlay() {
+            const overlay = document.getElementById('wrong-answer-overlay');
+            overlay.style.opacity = '0';
+            document.getElementById('wrong-content').style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
         }
 
         function restartGame() {
@@ -620,6 +691,10 @@
             
             const overlay = document.getElementById('game-over-overlay');
             overlay.style.opacity = '0';
+            
+            // Reiniciar también los divs de la historia por si acaso
+            document.getElementById('photos-section').style.display = 'block';
+            document.getElementById('letter-section').classList.add('hidden');
             
             setTimeout(() => {
                 overlay.style.display = 'none';
