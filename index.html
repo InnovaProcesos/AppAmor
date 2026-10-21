@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Valentina ❤️ - Mundo 3D</title>
+    <title>La Isla de Valen y el Lobito 3D</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@300;400;600;800&family=Pacifico&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #0f0514;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(75, 29, 82, 0.4), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.2), transparent 25%);
-            color: #ffffff;
+            font-family: 'Nunito', sans-serif;
+            /* Fondo de cielo estilo Mario */
+            background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
             margin: 0;
@@ -27,28 +25,13 @@
             justify-content: center;
         }
 
-        .title-font { font-family: 'Pacifico', cursive; }
-        .mario-font { font-family: 'Fredoka One', cursive; }
-
-        /* Nubes flotantes */
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            filter: blur(10px);
-            animation: drift linear infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-        @keyframes drift {
-            from { transform: translateX(-100vw); }
-            to { transform: translateX(100vw); }
-        }
+        .mario-font { font-family: 'Fredoka One', cursive; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+        .soft-shadow { filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
 
         .screen {
             display: none;
             opacity: 0;
-            transform: scale(0.95);
+            transform: scale(0.9);
             transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
             position: relative;
@@ -60,297 +43,375 @@
             transform: scale(1);
         }
 
-        /* --- ANIMACIÓN DE PERSONAJES (BESO Y ABRAZO) --- */
-        .couple-stage {
+        /* ==========================================
+           ANIMACIÓN CINEMÁTICA PERSONAJES (INICIO)
+           ========================================== */
+        .cinematic-stage {
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            height: 180px;
+            height: 250px;
             position: relative;
             margin-bottom: 2rem;
+            perspective: 800px;
         }
         
-        .char-wrapper {
+        .character {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100px;
+            width: 120px;
+            z-index: 10;
         }
 
-        /* Cuerpos kawaii CSS */
-        .body-part {
-            width: 50px;
-            height: 60px;
-            border-radius: 40px 40px 20px 20px;
+        /* Cabezas usando tus imágenes */
+        .head-img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            z-index: 3;
             position: relative;
-            margin-top: -15px;
-            z-index: 1;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.3);
+            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.4));
+            transition: transform 0.3s;
         }
-        .wolf-body { background: #9ca3af; } /* Gris lobo */
-        .bear-body { background: #8b5a2b; } /* Café oso */
 
-        /* Bracitos */
+        /* Cuerpos base */
+        .body-base {
+            width: 70px;
+            height: 80px;
+            border-radius: 40px 40px 30px 30px;
+            position: relative;
+            margin-top: -30px;
+            z-index: 1;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2);
+        }
+        /* Colores basados en tus imágenes */
+        .wolf-body { background: linear-gradient(to bottom, #7EB5A6, #F5B880); } 
+        .bear-body { background: linear-gradient(to bottom, #DDA782, #FDF5E6); } 
+
+        /* Extremidades animadas */
         .arm {
             position: absolute;
-            width: 15px;
-            height: 35px;
-            border-radius: 10px;
-            top: 10px;
-            transform-origin: top center;
-            animation: wave 2s ease-in-out infinite alternate;
-        }
-        .wolf-arm { background: #828a96; }
-        .bear-arm { background: #704721; }
-        .arm-left { left: -10px; transform: rotate(20deg); }
-        .arm-right { right: -10px; transform: rotate(-20deg); }
-
-        @keyframes wave {
-            0% { transform: rotate(10deg); }
-            100% { transform: rotate(45deg); }
-        }
-
-        .head {
-            font-size: 5rem;
-            line-height: 1;
-            z-index: 2;
-            position: relative;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4));
-        }
-
-        /* Secuencia de acercarse, besarse y volver */
-        .wolf-wrapper {
-            animation: moveWolf 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bear-wrapper {
-            animation: moveBear 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes moveWolf {
-            0%, 100% { transform: translateX(-30px) translateY(0); }
-            20% { transform: translateX(10px) translateY(-10px) rotate(15deg); } /* Salta al beso */
-            30%, 50% { transform: translateX(25px) translateY(0) rotate(25deg); } /* Abrazo */
-            70% { transform: translateX(-30px) translateY(0) rotate(0); } /* Vuelve */
-        }
-        @keyframes moveBear {
-            0%, 100% { transform: translateX(30px) translateY(0); }
-            20% { transform: translateX(-10px) translateY(-10px) rotate(-15deg); } 
-            30%, 50% { transform: translateX(-25px) translateY(0) rotate(-25deg); } 
-            70% { transform: translateX(30px) translateY(0) rotate(0); } 
-        }
-
-        /* Corazón que explota en el beso */
-        .kiss-heart {
-            position: absolute;
-            bottom: 80px;
-            font-size: 3rem;
-            left: calc(50% - 1.5rem);
-            opacity: 0;
-            transform: scale(0);
-            animation: popHeart 4s infinite;
-            z-index: 5;
-            filter: drop-shadow(0 0 15px #ff007f);
-        }
-        @keyframes popHeart {
-            0%, 20% { opacity: 0; transform: scale(0) translateY(0); }
-            35% { opacity: 1; transform: scale(1.2) translateY(-30px); }
-            50% { opacity: 1; transform: scale(1) translateY(-40px); }
-            60%, 100% { opacity: 0; transform: scale(1.5) translateY(-60px); }
-        }
-
-
-        /* --- MAPA ISLA 3D (ESTILO MARIO) --- */
-        .island-perspective {
-            perspective: 1200px; /* Profundidad 3D */
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .island-3d {
-            position: relative;
-            width: 100%;
-            height: 65vh;
-            min-height: 500px;
-            /* Inclinación 3D del plano */
-            transform: rotateX(45deg) rotateZ(-10deg);
-            transform-style: preserve-3d;
-            
-            /* Textura de la isla */
-            background: linear-gradient(135deg, #3d1435 0%, #1a0822 100%);
-            border-radius: 60px;
-            /* Grosor 3D de la isla */
-            box-shadow: 
-                -10px 10px 0 #20051a,
-                -15px 15px 0 #150311,
-                -20px 20px 30px rgba(0,0,0,0.9),
-                inset 0 0 50px rgba(236,72,153,0.2);
-            transition: transform 0.5s ease;
-        }
-        /* Movimiento sutil de la isla */
-        .island-3d:hover {
-            transform: rotateX(40deg) rotateZ(-5deg);
-        }
-
-        /* Camino 3D brillante */
-        .map-path {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-            pointer-events: none;
-            /* Anular rotación para el SVG plano dentro del div 3D */
-            transform: translateZ(2px); 
-        }
-        .map-line {
-            stroke-dasharray: 15;
-            animation: flowPath 20s linear infinite;
-            filter: drop-shadow(0 0 8px rgba(255,105,180,0.8));
-        }
-        @keyframes flowPath { to { stroke-dashoffset: -1000; } }
-
-        /* Nodos/Plataformas 3D */
-        .level-node {
-            position: absolute;
-            width: 45px;
+            width: 22px;
             height: 45px;
-            border-radius: 50%;
-            transform: translate(-50%, -50%) translateZ(20px) rotateX(-45deg) rotateZ(10deg); /* Contrarrestar inclinación de la isla para que miren al frente */
+            border-radius: 20px;
+            top: 15px;
+            transform-origin: top center;
+            box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+        }
+        .wolf-arm { background: #7EB5A6; }
+        .bear-arm { background: #DDA782; }
+        
+        .arm-left { left: -10px; }
+        .arm-right { right: -10px; }
+        
+        .leg {
+            position: absolute;
+            width: 25px;
+            height: 30px;
+            border-radius: 10px 10px 20px 20px;
+            bottom: -15px;
+            background: inherit;
+        }
+        .leg-left { left: 5px; }
+        .leg-right { right: 5px; }
+
+        /* COREOGRAFÍA DEL BESO Y ABRAZO */
+        .wolf-anim { animation: wolfAction 6s infinite ease-in-out; }
+        .bear-anim { animation: bearAction 6s infinite ease-in-out; }
+        
+        .wolf-anim .arm-right { animation: hugRight 6s infinite ease-in-out; }
+        .bear-anim .arm-left { animation: hugLeft 6s infinite ease-in-out; }
+        
+        .wolf-anim .arm-left { animation: waveArm 6s infinite ease-in-out; }
+        .bear-anim .arm-right { animation: waveArm 6s infinite ease-in-out; animation-delay: 0.5s; }
+
+        @keyframes wolfAction {
+            0%, 100% { transform: translateX(-40px) translateY(0); } /* Separados */
+            15%, 35% { transform: translateX(25px) translateY(-10px) rotate(10deg); } /* Se acercan y besan */
+            60%, 80% { transform: translateX(-40px) translateY(0) rotate(0); } /* Vuelven a posición para saludar */
+        }
+        @keyframes bearAction {
+            0%, 100% { transform: translateX(40px) translateY(0); }
+            15%, 35% { transform: translateX(-25px) translateY(-10px) rotate(-10deg); } 
+            60%, 80% { transform: translateX(40px) translateY(0) rotate(0); } 
+        }
+
+        @keyframes hugRight {
+            0%, 100%, 60%, 80% { transform: rotate(-20deg); }
+            15%, 35% { transform: rotate(-80deg) translateX(-10px) translateY(10px); } /* Abraza */
+        }
+        @keyframes hugLeft {
+            0%, 100%, 60%, 80% { transform: rotate(20deg); }
+            15%, 35% { transform: rotate(80deg) translateX(10px) translateY(10px); }
+        }
+
+        @keyframes waveArm {
+            0%, 40% { transform: rotate(0deg); }
+            60%, 80% { transform: rotate(130deg) translateY(-10px); } /* Levanta el brazo para saludar */
+            65%, 75% { transform: rotate(110deg) translateY(-10px); } /* Agita */
+        }
+
+        /* Corazones explosivos del beso */
+        .kiss-fx {
+            position: absolute;
+            bottom: 120px;
+            font-size: 3rem;
+            opacity: 0;
+            z-index: 20;
+            animation: burstHeart 6s infinite;
+        }
+        @keyframes burstHeart {
+            0%, 14% { opacity: 0; transform: scale(0) translateY(0); }
+            20% { opacity: 1; transform: scale(1.5) translateY(-30px); }
+            35% { opacity: 0; transform: scale(2) translateY(-80px); }
+            100% { opacity: 0; }
+        }
+
+
+        /* ==========================================
+           MAPA 3D ESTILO MARIO PARTY 
+           ========================================== */
+        .island-perspective {
+            perspective: 1200px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            height: 60vh;
+            min-height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            z-index: 10;
+        }
+
+        .world-base {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            /* Inclinación de mesa 3D */
+            transform: rotateX(60deg) rotateZ(-15deg);
+            transform-style: preserve-3d;
+            border-radius: 50%;
+            background: radial-gradient(circle, #4facfe 0%, #0072ff 100%);
+            /* Borde dorado de la mesa y profundidad del agua */
+            box-shadow: 
+                0 10px 0 #0056b3,
+                0 15px 0 #d4af37, /* Borde dorado */
+                0 25px 30px rgba(0,0,0,0.6),
+                inset 0 0 40px rgba(255,255,255,0.4);
+            transition: transform 0.5s;
+            animation: floatTable 4s ease-in-out infinite alternate;
+        }
+        @keyframes floatTable {
+            from { transform: rotateX(60deg) rotateZ(-15deg) translateY(0px); }
+            to { transform: rotateX(58deg) rotateZ(-12deg) translateY(-15px); }
+        }
+
+        /* Diferentes Biomas (Islas) */
+        .biome {
+            position: absolute;
+            transform-style: preserve-3d;
+        }
+        /* Pradera (Abajo Izquierda) */
+        .biome-grass {
+            width: 220px; height: 180px;
+            background: #5dc237;
+            border-radius: 50% 40% 60% 40%;
+            bottom: 40px; left: 30px;
+            box-shadow: 0 15px 0 #3a821e, inset 0 10px 10px rgba(255,255,255,0.3);
+        }
+        /* Desierto (Arriba Izquierda) */
+        .biome-desert {
+            width: 180px; height: 150px;
+            background: #f7d059;
+            border-radius: 40% 60% 40% 50%;
+            top: 40px; left: 40px;
+            box-shadow: 0 15px 0 #c7a02c, inset 0 10px 10px rgba(255,255,255,0.3);
+        }
+        /* Lava (Arriba Derecha) */
+        .biome-lava {
+            width: 200px; height: 160px;
+            background: #222;
+            border-radius: 60% 40% 50% 50%;
+            top: 50px; right: 30px;
+            box-shadow: 0 15px 0 #000, inset 0 0 20px #ff4500;
+            border: 2px solid #ff4500;
+        }
+        /* Playa/Tropical (Abajo Derecha) */
+        .biome-tropical {
+            width: 160px; height: 160px;
+            background: #20b2aa;
+            border-radius: 50%;
+            bottom: 60px; right: 40px;
+            box-shadow: 0 15px 0 #008080, inset 0 10px 10px rgba(255,255,255,0.3);
+        }
+
+        /* Nubes flotando en el mapa */
+        .map-cloud {
+            position: absolute;
+            background: #fff;
+            border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transform: translateZ(50px); /* Flotan por encima */
+        }
+
+        /* Nodos 3D (Cilindros) */
+        .level-node {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            /* Se contrarresta la inclinación de la mesa para que miren arriba */
+            transform: translate(-50%, -50%) translateZ(20px) rotateX(-60deg) rotateZ(15deg); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1rem;
+            z-index: 20;
             transition: all 0.3s;
-            /* Estilo de cilindro 3D por defecto (Bloqueado) */
-            background: #374151;
-            box-shadow: 0 8px 0 #1f2937, 0 15px 15px rgba(0,0,0,0.6);
-            color: #9ca3af;
+            background: #fff;
+            color: #333;
+            box-shadow: 0 5px 0 #ccc, 0 10px 10px rgba(0,0,0,0.5);
         }
 
         .level-node.completed {
-            background: #10b981;
-            box-shadow: 0 8px 0 #047857, 0 15px 15px rgba(0,0,0,0.6);
+            background: #4ade80;
             color: white;
-            text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 0 #16a34a, 0 10px 10px rgba(0,0,0,0.5);
         }
 
         .level-node.unlocked {
-            background: #ec4899;
-            box-shadow: 0 8px 0 #be185d, 0 15px 20px rgba(236,72,153,0.6);
+            background: #ff007f;
             color: white;
             cursor: pointer;
-            animation: bounceNode 2s infinite;
+            box-shadow: 0 5px 0 #be185d, 0 10px 15px rgba(255,0,127,0.6);
+            animation: pulseNode 1s infinite alternate;
+        }
+        @keyframes pulseNode {
+            to { transform: translate(-50%, -50%) translateZ(35px) rotateX(-60deg) rotateZ(15deg) scale(1.2); }
         }
 
-        @keyframes bounceNode {
-            0%, 100% { transform: translate(-50%, -50%) translateZ(20px) rotateX(-45deg) rotateZ(10deg); }
-            50% { transform: translate(-50%, -50%) translateZ(35px) rotateX(-45deg) rotateZ(10deg); }
-        }
-
-        /* Avatar Osita en 3D en el Mapa */
-        #osita-avatar {
+        /* Avatar Osita en el Mapa (Usa la imagen) */
+        #map-avatar {
             position: absolute;
-            font-size: 3rem;
-            /* Contrarrestar la inclinación 3D para que esté de pie */
-            transform: translate(-50%, -100%) translateZ(40px) rotateX(-45deg) rotateZ(10deg);
-            z-index: 20;
+            width: 60px;
+            /* Contrarresta la rotación para estar de pie */
+            transform: translate(-50%, -100%) translateZ(40px) rotateX(-60deg) rotateZ(15deg);
+            z-index: 30;
             transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
-            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 20px 10px rgba(0,0,0,0.6));
+            animation: bounceAvatar 0.5s infinite alternate;
+        }
+        @keyframes bounceAvatar {
+            to { transform: translate(-50%, -100%) translateZ(55px) rotateX(-60deg) rotateZ(15deg); }
         }
 
-        /* Botón 3D estilo Mario */
-        .btn-3d {
-            background: #ec4899;
-            border: none;
-            color: white;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.5rem;
-            box-shadow: 0 10px 0 #be185d, 0 20px 20px rgba(0,0,0,0.5);
-            transition: all 0.1s;
-            cursor: pointer;
-        }
-        .btn-3d:active {
-            transform: translateY(10px);
-            box-shadow: 0 0px 0 #be185d, 0 5px 5px rgba(0,0,0,0.5);
-        }
-
+        /* UI Paneles */
         .glass-panel {
-            background: rgba(30, 10, 25, 0.8);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 105, 180, 0.3);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255, 77, 109, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            color: #333;
+        }
+
+        .btn-mario {
+            background: #ff004f;
+            color: white;
+            border: 4px solid #fff;
+            border-radius: 40px;
+            padding: 15px 40px;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 0 #b30037, 0 15px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .btn-mario:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 #b30037, 0 5px 5px rgba(0,0,0,0.4);
         }
     </style>
 </head>
 <body>
 
-    <!-- Generador de Nubes en el fondo -->
-    <div class="cloud" style="width: 200px; height: 60px; top: 10%; animation-duration: 40s;"></div>
-    <div class="cloud" style="width: 150px; height: 45px; top: 30%; animation-duration: 35s; animation-delay: -10s;"></div>
-    <div class="cloud" style="width: 250px; height: 80px; top: 70%; animation-duration: 50s; animation-delay: -20s;"></div>
+    <div class="container mx-auto px-4 relative z-10 w-full max-w-4xl min-h-screen flex flex-col justify-center py-10">
 
-    <div class="container mx-auto px-4 relative z-10 w-full max-w-3xl min-h-screen flex flex-col justify-center py-10">
-
-        <!-- PANTALLA 1: INICIO FANTÁSTICO -->
+        <!-- PANTALLA 1: INICIO CINEMÁTICO -->
         <section id="screen-home" class="screen active flex-col items-center justify-center text-center">
             
-            <!-- Escenario de los personajes abrazándose -->
-            <div class="couple-stage">
-                <!-- Lobito -->
-                <div class="char-wrapper wolf-wrapper">
-                    <div class="head">🐺</div>
-                    <div class="body-part wolf-body">
+            <div class="cinematic-stage">
+                <!-- LOBITO -->
+                <div class="character wolf-anim">
+                    <!-- ¡AQUÍ CARGA TU IMAGEN DEL LOBITO! -->
+                    <img src="image_42b75e.png" alt="Lobito" class="head-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3233/3233483.png'">
+                    <div class="body-base wolf-body">
                         <div class="arm wolf-arm arm-left"></div>
                         <div class="arm wolf-arm arm-right"></div>
+                        <div class="leg leg-left"></div>
+                        <div class="leg leg-right"></div>
                     </div>
-                    <span class="mt-4 text-xs font-bold bg-blue-900/60 px-3 py-1 rounded-full text-blue-200">Lobito (Tú)</span>
                 </div>
-                
-                <div class="kiss-heart">💖</div>
 
-                <!-- Osita -->
-                <div class="char-wrapper bear-wrapper">
-                    <div class="head">🐻<span style="position:absolute; top:-10px; right:-5px; font-size:2.5rem; transform:rotate(15deg);">🎀</span></div>
-                    <div class="body-part bear-body">
+                <div class="kiss-fx">💖✨</div>
+
+                <!-- OSITA -->
+                <div class="character bear-anim">
+                    <!-- ¡AQUÍ CARGA TU IMAGEN DE LA OSITA! -->
+                    <img src="image_42b79c.png" alt="Osita" class="head-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3069/3069172.png'">
+                    <div class="body-base bear-body">
                         <div class="arm bear-arm arm-left"></div>
                         <div class="arm bear-arm arm-right"></div>
+                        <div class="leg leg-left"></div>
+                        <div class="leg leg-right"></div>
                     </div>
-                    <span class="mt-4 text-xs font-bold bg-pink-900/60 px-3 py-1 rounded-full text-pink-200">Osita (Valen)</span>
                 </div>
             </div>
 
-            <h2 class="text-2xl text-pink-200 mb-2 mt-4 font-semibold shadow-black drop-shadow-md">Nuestra Aventura Mágica</h2>
-            <h1 class="text-5xl md:text-7xl title-font mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-pink-300 to-pink-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">
-                Valentina Ocampo
-            </h1>
-            
-            <p class="text-gray-200 mb-10 max-w-md mx-auto text-lg drop-shadow-md">
-                He construido esta isla 3D solo para ti. Deberás guiar a la osita hasta el tesoro final. ¿Aceptas el reto, mi amor?
-            </p>
-            
-            <button onclick="enterMapWorld()" class="btn-3d mario-font">
-                ¡JUGAR! <i class="fa-solid fa-gamepad ml-2"></i>
-            </button>
+            <div class="bg-white/20 backdrop-blur-md p-8 rounded-[40px] border-4 border-white shadow-2xl mt-8">
+                <h2 class="text-3xl text-yellow-300 mb-2 mario-font">Super Valen Bros</h2>
+                <h1 class="text-5xl md:text-6xl mario-font mb-6 text-white tracking-wide">
+                    La Isla del Amor
+                </h1>
+                <p class="text-white text-xl font-bold mb-8 drop-shadow-md">
+                    ¡La osita y el lobito te invitan a jugar! Supera los 10 mundos para ganar el gran premio.
+                </p>
+                
+                <button onclick="enterMapWorld()" class="btn-mario mario-font">
+                    ¡START! <i class="fa-solid fa-play ml-2"></i>
+                </button>
+            </div>
         </section>
 
 
-        <!-- PANTALLA 2: EL MAPA ISLA 3D -->
+        <!-- PANTALLA 2: EL MAPA 3D -->
         <section id="screen-map" class="screen flex-col items-center justify-center">
-            <h2 class="text-4xl mario-font text-pink-400 mb-2 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">Isla del Amor</h2>
-            <p class="text-sm text-pink-200 mb-8 font-bold tracking-wider uppercase">Completa los 10 mundos</p>
+            
+            <div class="w-full flex justify-between items-center mb-4 px-8">
+                <h2 class="text-4xl mario-font text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">Selecciona el Mundo</h2>
+                <div class="bg-white/80 text-black px-6 py-2 rounded-full font-bold text-xl flex items-center gap-2">
+                    <i class="fa-solid fa-star text-yellow-500"></i> <span id="star-count">0</span>/10
+                </div>
+            </div>
             
             <div class="island-perspective">
-                <div class="island-3d" id="map-container">
-                    <!-- Camino Brillante -->
-                    <svg class="map-path" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
-                        <polyline id="path-line" fill="none" stroke="#ff69b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
-                    </svg>
+                <div class="world-base" id="map-container">
+                    
+                    <!-- BIOMAS (Islas) -->
+                    <div class="biome biome-grass"></div>
+                    <div class="biome biome-desert"></div>
+                    <div class="biome biome-lava"></div>
+                    <div class="biome biome-tropical"></div>
 
-                    <!-- Avatar Osita (Renderizada en 3D) -->
-                    <div id="osita-avatar">🐻🎀</div>
+                    <!-- Detalles decorativos (Nubes) -->
+                    <div class="map-cloud" style="width: 80px; height: 30px; top: 20%; left: 10%;"></div>
+                    <div class="map-cloud" style="width: 100px; height: 40px; top: 60%; right: 10%;"></div>
+                    <div class="map-cloud" style="width: 60px; height: 25px; bottom: 30%; left: 40%;"></div>
+
+                    <!-- Avatar Osita (La misma imagen para recorrer el mapa) -->
+                    <img src="image_42b79c.png" id="map-avatar" alt="Avatar" onerror="this.style.display='none'">
 
                     <!-- Nodos inyectados por JS -->
                     <div id="nodes-container"></div>
@@ -359,73 +420,67 @@
         </section>
 
 
-        <!-- PANTALLA 3: LA PREGUNTA (Se mantiene el cristal elegante) -->
-        <section id="screen-game-question" class="screen flex-col w-full glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
-            <button onclick="navTo('screen-map')" class="absolute top-4 left-4 text-gray-400 hover:text-white z-10"><i class="fa-solid fa-arrow-left mr-2"></i> Volver al Mapa</button>
+        <!-- PANTALLA 3: LA PREGUNTA -->
+        <section id="screen-game-question" class="screen flex-col w-full glass-panel p-8 relative overflow-hidden">
+            <button onclick="navTo('screen-map')" class="absolute top-6 left-6 text-gray-600 font-bold hover:text-black z-10"><i class="fa-solid fa-circle-left text-2xl mr-2"></i> Salir</button>
             
-            <div class="flex justify-between items-center mb-6 mt-6 border-b border-pink-500/30 pb-4">
-                <span id="level-indicator" class="text-white font-bold uppercase tracking-widest text-xl bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-2 rounded-full mario-font shadow-lg">Mundo 1</span>
-                <div class="flex gap-2 text-red-500 text-2xl" id="lives-container"></div>
+            <div class="text-center mt-8 mb-6">
+                <span id="level-indicator" class="text-white text-3xl px-8 py-3 rounded-full mario-font bg-blue-500 shadow-[0_5px_0_#0056b3]">Mundo 1</span>
+            </div>
+            
+            <div class="flex justify-center gap-2 text-red-500 text-3xl mb-6" id="lives-container"></div>
+
+            <div class="min-h-[120px] flex items-center justify-center mb-8 bg-white/50 rounded-3xl p-6 shadow-inner">
+                <h2 id="question-text" class="text-3xl font-black text-center text-gray-800"></h2>
             </div>
 
-            <div class="min-h-[120px] flex items-center justify-center mb-6">
-                <h2 id="question-text" class="text-2xl md:text-4xl font-semibold text-center leading-relaxed text-pink-100 drop-shadow-md"></h2>
-            </div>
+            <div id="answer-container" class="w-full mb-4 flex flex-col justify-center"></div>
 
-            <div id="answer-container" class="w-full mb-4 min-h-[100px] flex flex-col justify-center"></div>
-
-            <button id="btn-submit" onclick="checkTextAnswer()" class="hidden w-full mt-8 btn-3d mario-font">
-                Confirmar
+            <button id="btn-submit" onclick="checkTextAnswer()" class="hidden w-full mx-auto mt-8 btn-mario" style="max-width: 300px;">
+                Responder
             </button>
-
-            <!-- Castigo -->
-            <div id="cooldown-overlay" class="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20 hidden backdrop-blur-xl">
-                <div class="text-8xl mb-4 animate-bounce">🐺🛑</div>
-                <h3 class="text-4xl font-bold text-pink-500 mb-2 mario-font">¡Ups!</h3>
-                <p class="text-gray-300 mb-4 text-xl">El lobito te abraza para que pienses bien...</p>
-                <span class="text-6xl font-bold text-red-500 mario-font" id="cooldown-timer">10</span>
-            </div>
         </section>
 
         <!-- OVERLAY: NIVEL SUPERADO -->
-        <div id="level-passed-overlay" class="absolute inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-md" onclick="closeLevelPassedOverlay()">
+        <div id="level-passed-overlay" class="absolute inset-0 bg-white/90 z-50 hidden flex-col items-center justify-center backdrop-blur-sm" onclick="closeLevelPassedOverlay()">
             <div class="text-center transform scale-0 transition-transform duration-500" id="passed-content">
-                <div class="text-8xl mb-4 animate-bounce">⭐</div>
-                <h2 class="text-5xl mario-font text-yellow-400 mb-4 drop-shadow-[0_5px_5px_rgba(0,0,0,1)]">¡Excelente!</h2>
-                <p class="text-2xl text-white font-bold" id="passed-msg"></p>
-                <p class="mt-8 text-sm text-pink-300 animate-pulse">(Toca la pantalla para avanzar en la isla)</p>
+                <img src="image_42b75e.png" class="w-40 h-40 object-contain mx-auto mb-4 drop-shadow-xl animate-bounce" onerror="this.style.display='none'">
+                <h2 class="text-6xl mario-font text-yellow-500 mb-4 drop-shadow-[0_4px_0_#b45309]">¡Genial!</h2>
+                <p class="text-3xl text-gray-800 font-bold" id="passed-msg"></p>
+                <p class="mt-8 text-lg font-bold text-blue-500 animate-pulse">Toca para seguir avanzando</p>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Tus 10 niveles
+        // PREGUNTAS
         const gameLevels = [
-            { type: 'choice', question: '¿Nivel 1: Pregunta de prueba?', options: ['Opción A', 'Opción B (Correcta)'], answer: 'Opción B (Correcta)', msg: '¡Qué inteligente eres, osita!' },
-            { type: 'text', question: 'Nivel 2: Pregunta para escribir', answer: 'amor', msg: '¡Sabía que lo adivinarías!' },
-            { type: 'choice', question: 'Nivel 3', options: ['1', '2'], answer: '1', msg: 'Avanzando...' },
-            { type: 'choice', question: 'Nivel 4', options: ['A', 'B'], answer: 'A', msg: '¡Eres la mejor!' },
-            { type: 'choice', question: 'Nivel 5', options: ['X', 'Y'], answer: 'X', msg: 'Ya vamos por la mitad' },
-            { type: 'choice', question: 'Nivel 6', options: ['1', '2'], answer: '1', msg: '¡Sigue así!' },
-            { type: 'choice', question: 'Nivel 7', options: ['1', '2'], answer: '1', msg: 'Falta poco...' },
-            { type: 'choice', question: 'Nivel 8', options: ['1', '2'], answer: '1', msg: '¡Wow!' },
-            { type: 'choice', question: 'Nivel 9', options: ['1', '2'], answer: '1', msg: '¡Último paso!' },
-            { type: 'choice', question: 'Nivel 10 (Jefe Final)', options: ['Ganar', 'Perder'], answer: 'Ganar', msg: '¡Lo lograste!' }
+            { type: 'choice', question: '¿Prueba 1: Listos para jugar?', options: ['No', '¡Sí!'], answer: '¡Sí!', msg: '¡Empezamos la aventura!' },
+            { type: 'text', question: 'Escribe una palabra tierna', answer: 'amor', msg: '¡Qué linda eres!' },
+            { type: 'choice', question: 'Mundo 3', options: ['A', 'B'], answer: 'A', msg: '¡Vas volando!' },
+            { type: 'choice', question: 'Mundo 4', options: ['A', 'B'], answer: 'A', msg: '¡Increíble!' },
+            { type: 'choice', question: 'Mundo 5', options: ['A', 'B'], answer: 'A', msg: '¡Ya casi a la mitad!' },
+            { type: 'choice', question: 'Mundo 6', options: ['A', 'B'], answer: 'A', msg: '¡Súper Valen!' },
+            { type: 'choice', question: 'Mundo 7', options: ['A', 'B'], answer: 'A', msg: '¡Eres invencible!' },
+            { type: 'choice', question: 'Mundo 8', options: ['A', 'B'], answer: 'A', msg: '¡Entrando a la lava!' },
+            { type: 'choice', question: 'Mundo 9', options: ['A', 'B'], answer: 'A', msg: '¡Un paso más!' },
+            { type: 'choice', question: 'Castillo Final', options: ['Ganar', 'Perder'], answer: 'Ganar', msg: '¡Rescataste el tesoro!' }
         ];
 
-        // Coordenadas estilo zig-zag ascendente (0 a 100%)
+        // Coordenadas agrupadas por las islas (Biomas)
         const mapCoordinates = [
-            { x: 20, y: 85 }, { x: 50, y: 80 }, { x: 80, y: 70 },
-            { x: 75, y: 55 }, { x: 45, y: 50 }, { x: 20, y: 40 },
-            { x: 30, y: 25 }, { x: 60, y: 20 }, { x: 85, y: 30 },
-            { x: 50, y: 5 }   // Trofeo final arriba
+            { x: 25, y: 80 }, { x: 45, y: 70 }, // Pradera
+            { x: 15, y: 40 }, { x: 35, y: 35 }, // Desierto
+            { x: 50, y: 50 }, // Centro agua
+            { x: 80, y: 75 }, { x: 70, y: 60 }, // Tropical
+            { x: 85, y: 35 }, { x: 65, y: 25 }, // Lava
+            { x: 50, y: 15 } // Jefe Final
         ];
 
         let currentLevelIndex = 0; 
         let unlockedLevel = 0;     
         let attemptsLeft = 3;
-        let isCooldown = false;
 
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
@@ -449,11 +504,9 @@
         function buildMap() {
             const container = document.getElementById('nodes-container');
             container.innerHTML = '';
-            let svgPoints = '';
+            document.getElementById('star-count').innerText = unlockedLevel;
             
             mapCoordinates.forEach((coord, i) => {
-                svgPoints += `${coord.x},${coord.y} `;
-
                 const node = document.createElement('div');
                 node.className = 'level-node';
                 node.style.left = `${coord.x}%`;
@@ -462,25 +515,21 @@
 
                 if (i < unlockedLevel) {
                     node.classList.add('completed');
-                    node.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    node.innerHTML = '<i class="fa-solid fa-star"></i>';
                 } else if (i === unlockedLevel) {
                     node.classList.add('unlocked');
                     node.onclick = () => openLevel(i);
-                } else {
-                    node.innerHTML = '<i class="fa-solid fa-lock text-sm"></i>';
                 }
 
                 container.appendChild(node);
             });
-
-            document.getElementById('path-line').setAttribute('points', svgPoints);
         }
 
         function updateOsitaPosition(index) {
-            const osita = document.getElementById('osita-avatar');
+            const avatar = document.getElementById('map-avatar');
             const target = mapCoordinates[index];
-            osita.style.left = `${target.x}%`;
-            osita.style.top = `${target.y}%`;
+            avatar.style.left = `${target.x}%`;
+            avatar.style.top = `${target.y}%`;
         }
 
         function openLevel(index) {
@@ -503,16 +552,15 @@
             if (q.type === 'text') {
                 btnSub.style.display = 'block';
                 const input = document.createElement('input'); input.type = 'text'; input.id = 'answer-input';
-                input.className = 'w-full bg-black/60 border-4 border-pink-500 rounded-[30px] px-6 py-5 text-center text-2xl outline-none focus:border-yellow-400 text-white font-bold transition-colors';
-                input.placeholder = "Toca para escribir...";
-                input.addEventListener('keypress', e => { if (e.key === 'Enter') checkTextAnswer(); });
-                ansCont.appendChild(input); setTimeout(() => input.focus(), 800);
+                input.className = 'w-full max-w-lg mx-auto border-4 border-blue-400 rounded-2xl px-6 py-4 text-center text-3xl font-bold text-gray-700 outline-none focus:border-yellow-400 bg-white shadow-inner';
+                input.placeholder = "Escribe aquí...";
+                ansCont.appendChild(input); 
             } else {
                 btnSub.style.display = 'none'; 
-                const grid = document.createElement('div'); grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full';
+                const grid = document.createElement('div'); grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto';
                 q.options.forEach(opt => {
                     const btn = document.createElement('button'); btn.textContent = opt;
-                    btn.className = 'bg-gray-800 hover:bg-pink-500 border-b-4 border-gray-900 hover:border-pink-800 text-xl font-bold py-6 px-4 rounded-[25px] transition-all shadow-lg active:translate-y-2 active:border-b-0';
+                    btn.className = 'bg-white text-blue-600 border-4 border-blue-200 hover:border-blue-500 hover:bg-blue-50 text-2xl font-black py-6 px-4 rounded-3xl transition-all shadow-[0_8px_0_#bfdbfe] active:translate-y-2 active:shadow-none';
                     btn.onclick = () => checkChoiceAnswer(opt); grid.appendChild(btn);
                 });
                 ansCont.appendChild(grid);
@@ -523,19 +571,17 @@
             const cont = document.getElementById('lives-container'); cont.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const icon = document.createElement('i');
-                icon.className = i < attemptsLeft ? 'fa-solid fa-heart animate-pulse' : 'fa-solid fa-heart-crack text-gray-700';
+                icon.className = i < attemptsLeft ? 'fa-solid fa-heart animate-bounce' : 'fa-regular fa-heart text-gray-400';
                 cont.appendChild(icon);
             }
         }
 
         function checkChoiceAnswer(sel) {
-            if (isCooldown) return;
             if (sel.toLowerCase().trim() === gameLevels[currentLevelIndex].answer.toLowerCase().trim()) handleRight(); 
             else handleWrong();
         }
 
         function checkTextAnswer() {
-            if (isCooldown) return;
             const val = document.getElementById('answer-input').value.trim().toLowerCase();
             if (!val) return;
             if (val.includes(gameLevels[currentLevelIndex].answer.toLowerCase())) handleRight(); 
@@ -543,7 +589,7 @@
         }
 
         function handleRight() {
-            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#ff4d6d', '#ffffff', '#ec4899', '#facc15'] });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, shapes: ['star'], colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8'] });
             
             document.getElementById('passed-msg').textContent = gameLevels[currentLevelIndex].msg;
             const overlay = document.getElementById('level-passed-overlay');
@@ -562,28 +608,16 @@
                 setTimeout(() => {
                     buildMap();
                     updateOsitaPosition(unlockedLevel < 10 ? unlockedLevel : 9);
-                    if (unlockedLevel === 10) setTimeout(() => alert("¡Pronto haremos la pantalla final!"), 2000);
+                    if (unlockedLevel === 10) setTimeout(() => alert("¡Victoria Total!"), 2000);
                 }, 700); 
             }, 500);
         }
 
         function handleWrong() {
             attemptsLeft--; renderLivesUI();
-            const input = document.getElementById('answer-input'); if (input) { input.value = ''; input.focus(); }
-            
             if (attemptsLeft <= 0) {
-                isCooldown = true;
-                const overlay = document.getElementById('cooldown-overlay');
-                const timerEl = document.getElementById('cooldown-timer');
-                overlay.style.display = 'flex';
-                let t = 10; timerEl.textContent = t;
-                const int = setInterval(() => {
-                    t--; timerEl.textContent = t;
-                    if(t <= 0) {
-                        clearInterval(int); overlay.style.display = 'none';
-                        isCooldown = false; attemptsLeft = 3; renderLivesUI();
-                    }
-                }, 1000);
+                alert("¡El lobito te atrapó! Se reinicia el nivel.");
+                attemptsLeft = 3; renderLivesUI();
             }
         }
     </script>
