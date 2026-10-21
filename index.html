@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafío de Amor ❤️ - Plataforma</title>
+    <title>Para Valentina ❤️ - Nuestro Mundo</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Pacifico&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@300;400;600;800&family=Pacifico&display=swap');
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -25,12 +25,26 @@
         }
 
         .title-font { font-family: 'Pacifico', cursive; }
+        .mario-font { font-family: 'Fredoka One', cursive; }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
         }
+        @keyframes float-reverse {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(-2deg); }
+        }
+        
         .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-float-reverse { animation: float-reverse 3.5s ease-in-out infinite; }
+        
+        /* Animación de latido para el inicio */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,105,180,0.8)); }
+        }
+        .heartbeat { animation: heartbeat 2s infinite; }
 
         .screen {
             display: none;
@@ -46,305 +60,167 @@
         }
 
         .glass-panel {
-            background: rgba(20, 5, 15, 0.6);
+            background: rgba(20, 5, 15, 0.7);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 100, 150, 0.2);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 77, 109, 0.1);
+            border: 2px solid rgba(255, 100, 150, 0.3);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 77, 109, 0.2);
         }
 
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(5px);
-            z-index: 100;
+        /* --- ESTILOS DEL MAPA ISLA --- */
+        .island-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 70vh;
+            min-height: 500px;
+            background: radial-gradient(circle, rgba(50,15,40,0.8) 0%, rgba(10,1,5,0) 80%);
+            border-radius: 40px;
+            margin: 0 auto;
+        }
+
+        .level-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #4b5563;
+            border: 3px solid #1f2937;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(236,72,153,0.5); border-radius: 4px; }
-
-        .polaroid {
-            background: white;
-            padding: 15px 15px 40px 15px;
-            border-radius: 4px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            transform: scale(0.8) rotate(-5deg);
-            transition: all 0.5s;
-            max-width: 90vw;
-        }
-        .modal-overlay.active .polaroid {
-            transform: scale(1) rotate(2deg);
-        }
-        .polaroid img {
-            width: 100%;
-            max-width: 300px;
-            height: 300px;
-            object-fit: cover;
-            background: #eee;
-        }
-        .polaroid p {
-            color: #333;
-            font-family: 'Pacifico', cursive;
-            text-align: center;
-            margin-top: 15px;
+            font-weight: bold;
             font-size: 1.2rem;
+            z-index: 10;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-    </style>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'amor-amistad-saas';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            window.db = db;
-            window.auth = auth;
-            window.appId = appId;
-        } catch (e) { console.error("Firebase init error"); }
-
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) { console.error("Error de autenticación:", error); }
+        .level-node.unlocked {
+            background: #ec4899;
+            border-color: #fbcfe8;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ec4899;
+            animation: float 2s infinite;
         }
         
-        window.initAuth = initAuth;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
-        window.doc = doc;
-    </script>
+        .level-node.completed {
+            background: #10b981;
+            border-color: #a7f3d0;
+            color: white;
+        }
+
+        /* Avatar Osita en el Mapa */
+        #osita-avatar {
+            position: absolute;
+            font-size: 2.5rem;
+            transform: translate(-50%, -100%);
+            z-index: 20;
+            transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
+            filter: drop-shadow(0 10px 5px rgba(0,0,0,0.5));
+        }
+
+        /* Rutas (Líneas) del mapa */
+        .map-path {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .map-line {
+            stroke-dasharray: 10;
+            animation: dash 30s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: 1000; } }
+
+        /* Polaroid Overlay */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px); z-index: 100; display: flex;
+            align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .polaroid {
+            background: white; padding: 15px 15px 40px 15px; border-radius: 4px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); transform: scale(0.8) rotate(-5deg); transition: all 0.5s; max-width: 90vw;
+        }
+        .modal-overlay.active .polaroid { transform: scale(1) rotate(2deg); }
+        .polaroid p { color: #333; font-family: 'Pacifico', cursive; text-align: center; margin-top: 15px; font-size: 1.2rem; }
+    </style>
 </head>
 <body>
 
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+    <!-- Fondo Mágico Decorativo -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
         <div class="absolute top-10 left-10 w-32 h-32 bg-pink-600 rounded-full mix-blend-screen filter blur-[50px] animate-pulse"></div>
         <div class="absolute bottom-10 right-10 w-40 h-40 bg-purple-600 rounded-full mix-blend-screen filter blur-[60px] animate-pulse" style="animation-delay: 2s;"></div>
     </div>
 
     <div class="container mx-auto px-4 relative z-10 w-full max-w-3xl min-h-screen flex flex-col justify-center py-10">
 
+        <!-- PANTALLA 1: LOGIN KAWAII PARA VALENTINA -->
         <section id="screen-home" class="screen active flex-col items-center justify-center text-center">
-            <div class="mb-4 animate-float">
-                <i class="fa-solid fa-gift text-6xl text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]"></i>
+            
+            <div class="flex justify-center items-center gap-6 mb-8">
+                <!-- El Lobito (Tú) -->
+                <div class="flex flex-col items-center animate-float-reverse">
+                    <div class="text-7xl drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]">🐺</div>
+                    <span class="mt-2 text-sm text-blue-300 font-bold bg-blue-900/40 px-3 py-1 rounded-full">Tú</span>
+                </div>
+                
+                <!-- Corazón -->
+                <div class="text-5xl text-pink-500 heartbeat mt-[-20px]">💖</div>
+                
+                <!-- La Osita (Ella) -->
+                <div class="flex flex-col items-center animate-float">
+                    <div class="text-7xl drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]">🐻🎀</div>
+                    <span class="mt-2 text-sm text-pink-300 font-bold bg-pink-900/40 px-3 py-1 rounded-full">Valen</span>
+                </div>
             </div>
-            <h1 class="text-5xl md:text-6xl title-font mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-500">
-                Regalo Interactivo
+
+            <h2 class="text-2xl text-gray-300 mb-2">Un mundo diseñado solo para</h2>
+            <h1 class="text-4xl md:text-6xl title-font mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-pink-500 drop-shadow-lg">
+                Valentina Ocampo Miranda
             </h1>
-            <p class="text-gray-300 mb-10 max-w-md mx-auto">La plataforma para crear experiencias únicas y sorprender a tu pareja con un juego personalizado.</p>
             
-            <div class="flex flex-col md:flex-row gap-6 w-full justify-center">
-                <button onclick="navTo('screen-creator-login')" class="glass-panel hover:border-pink-500 hover:bg-pink-900/40 p-6 rounded-2xl transition-all duration-300 flex-1 group">
-                    <i class="fa-solid fa-wand-magic-sparkles text-4xl text-pink-400 mb-4 group-hover:scale-110 transition-transform"></i>
-                    <h2 class="text-xl font-bold mb-2">Crear Regalo</h2>
-                    <p class="text-xs text-gray-400">Tengo un código de compra y quiero armar las preguntas.</p>
-                </button>
-                
-                <button onclick="navTo('screen-player-login')" class="glass-panel hover:border-purple-500 hover:bg-purple-900/40 p-6 rounded-2xl transition-all duration-300 flex-1 group">
-                    <i class="fa-solid fa-gamepad text-4xl text-purple-400 mb-4 group-hover:scale-110 transition-transform"></i>
-                    <h2 class="text-xl font-bold mb-2">Jugar / Recibir</h2>
-                    <p class="text-xs text-gray-400">Tengo un código de juego que me enviaron para participar.</p>
-                </button>
-            </div>
-            
-            <button onclick="navTo('screen-purchase')" class="mt-8 bg-gradient-to-r from-green-500 to-emerald-600 font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-green-500/30 transition-all text-white border border-green-400/50">
-                <i class="fa-solid fa-cart-shopping mr-2"></i> Adquirir esta App
-            </button>
-        </section>
-
-        <section id="screen-purchase" class="screen flex-col items-center justify-center">
-            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
-            <div class="glass-panel p-6 md:p-8 rounded-3xl w-full max-w-md text-center border-green-500/30">
-                <i class="fa-solid fa-money-bill-transfer text-4xl text-green-400 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">Adquiere tu Acceso</h2>
-                <p class="text-sm text-gray-300 mb-4">Transfiere <b>$15.000 COP</b> a Nequi o Daviplata y sube el comprobante aquí.</p>
-                
-                <div class="space-y-4 text-left">
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Tu Nombre</label>
-                        <input type="text" id="buyer-name" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-2 text-white outline-none focus:border-green-500" placeholder="Ej: Juan Pérez">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Tu Correo Electrónico</label>
-                        <input type="email" id="buyer-email" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-2 text-white outline-none focus:border-green-500" placeholder="correo@ejemplo.com">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Subir Comprobante</label>
-                        <input type="file" id="buyer-receipt" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-900/50 file:text-green-300 cursor-pointer">
-                    </div>
-                </div>
-
-                <p id="payment-msg" class="text-sm mt-3 hidden font-bold text-yellow-400"></p>
-                <button id="btn-submit-payment" onclick="submitPayment()" class="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-green-500/30 transition-all">
-                    Enviar Comprobante
-                </button>
-            </div>
-        </section>
-
-        <section id="screen-creator-login" class="screen flex-col items-center justify-center">
-            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
-            <div class="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
-                <i class="fa-solid fa-key text-4xl text-pink-500 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">Acceso de Creador</h2>
-                <p class="text-sm text-gray-400 mb-6">Ingresa el código que recibiste en tu correo tras la compra.</p>
-                
-                <input type="text" id="admin-code" placeholder="Ej: ADMIN2024" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-3 text-center uppercase tracking-widest focus:border-pink-500 outline-none mb-4">
-                <p id="creator-login-msg" class="text-sm text-red-400 mb-3 hidden"></p>
-                
-                <button onclick="loginCreator()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-pink-500/30 transition-all">
-                    Ingresar al Panel
-                </button>
-            </div>
-        </section>
-
-        <section id="screen-creator-dashboard" class="screen flex-col w-full h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-3xl title-font text-pink-400">Tu Regalo</h2>
-                    <p class="text-sm text-gray-400">Configura las preguntas y fotos</p>
-                </div>
-                <button onclick="saveAndGenerateCode()" id="btn-save-game" class="bg-green-600 hover:bg-green-500 px-6 py-2 rounded-full font-bold shadow-lg transition-all flex items-center">
-                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar y Generar Código
-                </button>
-            </div>
-            
-            <p id="save-msg" class="text-red-400 text-sm mb-4 hidden"></p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-hidden">
-                <div class="glass-panel rounded-2xl flex flex-col h-full overflow-hidden border border-gray-700">
-                    <div class="bg-gray-900/80 p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold">Preguntas (<span id="q-count">0</span>)</h3>
-                    </div>
-                    <div id="questions-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-                        <div class="text-center text-gray-500 mt-10">Aún no hay preguntas. Crea la primera a la derecha.</div>
-                    </div>
-                </div>
-
-                <div class="glass-panel rounded-2xl p-5 overflow-y-auto h-full border border-gray-700">
-                    <h3 class="font-bold mb-4 text-pink-300" id="form-title">Nueva Pregunta</h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Tipo de Pregunta</label>
-                            <select id="q-type" onchange="toggleFormFields()" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm">
-                                <option value="text">Pregunta Abierta (Escribir)</option>
-                                <option value="choice">Opción Múltiple (Botones)</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Pregunta</label>
-                            <textarea id="q-text" rows="2" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-pink-500 outline-none" placeholder="Ej: ¿Dónde fue nuestro primer beso?"></textarea>
-                        </div>
-
-                        <div id="field-options" class="hidden">
-                            <label class="text-xs text-gray-400 block mb-1">Opciones (Separa por comas)</label>
-                            <input type="text" id="q-options" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-pink-500 outline-none" placeholder="Ej: Cine, Parque, Restaurante">
-                        </div>
-
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Respuesta Correcta</label>
-                            <input type="text" id="q-answer" class="w-full bg-black/50 border border-gray-600 rounded-lg p-2 text-sm focus:border-green-500 outline-none" placeholder="Texto exacto (no importa mayúsculas)">
-                        </div>
-
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Foto al acertar (Sube una imagen)</label>
-                            <input type="file" id="q-image-upload" accept="image/*" class="w-full text-sm text-gray-400 cursor-pointer">
-                            <input type="hidden" id="q-image-base64">
-                            <div id="image-preview-container" class="hidden mt-2">
-                                <img id="image-preview" class="h-20 w-20 object-cover rounded-lg border border-gray-600">
-                                <button onclick="clearImageUpload()" class="text-xs text-red-400 mt-1 hover:underline">Quitar imagen</button>
-                            </div>
-                        </div>
-
-                        <p id="question-err-msg" class="text-red-400 text-xs hidden"></p>
-                        <button onclick="addQuestion()" class="w-full bg-pink-600 hover:bg-pink-500 py-2 rounded-lg font-bold transition-all">
-                            Agregar Pregunta al Juego
-                        </button>
-                    </div>
-
-                    <div class="mt-8 border-t border-gray-700 pt-6">
-                        <h3 class="font-bold mb-4 text-yellow-400">Premios Finales (3 Opciones)</h3>
-                        <div class="space-y-2">
-                            <input type="text" id="prize-1" placeholder="Premio 1" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Cena Romántica">
-                            <input type="text" id="prize-2" placeholder="Premio 2" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Día de Películas">
-                            <input type="text" id="prize-3" placeholder="Premio 3" class="w-full bg-black/50 border border-yellow-600/50 rounded-lg p-2 text-sm" value="Viaje de fin de semana">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div id="modal-game-code" class="modal-overlay">
-            <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border-green-500/50">
-                <i class="fa-solid fa-circle-check text-5xl text-green-400 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">¡Juego Guardado!</h2>
-                <p class="text-sm text-gray-300 mb-4">Comparte este código con tu pareja para que pueda jugar:</p>
-                <div class="bg-black/60 p-4 rounded-xl border border-gray-600 mb-6">
-                    <span id="display-game-code" class="text-4xl font-mono font-bold text-pink-400 tracking-widest">----</span>
-                </div>
-                <button onclick="closeCodeModal()" class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-bold">Cerrar</button>
-            </div>
-        </div>
-
-        <section id="screen-player-login" class="screen flex-col items-center justify-center">
-            <button onclick="navTo('screen-home')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
-            <div class="glass-panel p-8 rounded-3xl w-full max-w-md text-center">
-                <i class="fa-solid fa-heart-circle-check text-5xl text-purple-500 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">Ingresar al Juego</h2>
-                <p class="text-sm text-gray-400 mb-6">Escribe el código secreto que te compartieron.</p>
-                <input type="text" id="player-code" placeholder="CÓDIGO DE 4 DÍGITOS" class="w-full bg-black/50 border border-gray-600 rounded-xl px-4 py-4 text-center text-xl uppercase tracking-widest focus:border-purple-500 outline-none mb-4 font-mono">
-                <button id="btn-load-game" onclick="loadGameAsPlayer()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 font-bold py-3 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-all flex justify-center items-center">
-                    <span>Comenzar</span> <i id="player-loading-icon" class="fa-solid fa-spinner fa-spin ml-2 hidden"></i>
-                </button>
-                <p id="player-error" class="text-red-400 text-sm mt-3 hidden"></p>
-            </div>
-        </section>
-
-        <section id="screen-game-start" class="screen flex-col items-center justify-center text-center py-10">
-            <div class="mb-6 text-pink-400 text-6xl animate-float relative">
-                <i class="fa-solid fa-heart text-pink-500 text-7xl drop-shadow-[0_0_25px_rgba(236,72,153,1)]"></i>
-            </div>
-            <h1 class="text-4xl md:text-5xl title-font mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-red-400 to-pink-500">
-                Nuestra Historia
-            </h1>
-            <p class="text-lg mb-8 text-gray-300 max-w-md mx-auto font-light">
-                Alguien preparó este desafío especialmente para ti. ¿Qué tanto nos conoces? Responde bien para desbloquear el premio final.
+            <p class="text-gray-300 mb-10 max-w-md mx-auto text-lg">
+                Bienvenida, pequeña osita. He preparado 10 niveles especiales para ti. ¿Estás lista para comenzar nuestra aventura?
             </p>
-            <button onclick="startGameEngine()" class="bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)] hover:scale-105 transition duration-300 text-xl border border-pink-400/50">
-                Iniciar el Desafío <i class="fa-solid fa-play ml-2"></i>
+            
+            <button onclick="enterMapWorld()" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_30px_rgba(236,72,153,0.6)] hover:scale-110 transition duration-300 text-2xl mario-font border-2 border-pink-300">
+                ¡Ingresar al Mundo! <i class="fa-solid fa-play ml-2 text-lg"></i>
             </button>
         </section>
 
-        <section id="screen-game-question" class="screen flex-col w-full glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
-            <div class="w-full bg-gray-900/50 rounded-full h-3 mb-6 border border-gray-700/50">
-                <div id="progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-1000 w-0"></div>
-            </div>
 
-            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-xs md:text-sm bg-pink-900/30 px-4 py-1.5 rounded-full">Nivel 1</span>
+        <!-- PANTALLA 2: EL MAPA ISLA (ESTILO MARIO) -->
+        <section id="screen-map" class="screen flex-col items-center justify-center">
+            <h2 class="text-3xl mario-font text-pink-400 mb-2 drop-shadow-md">La Isla de Nuestro Amor</h2>
+            <p class="text-sm text-gray-400 mb-6">Guía a la osita hasta el gran premio final</p>
+            
+            <div class="island-container glass-panel" id="map-container">
+                <!-- Las líneas del camino se dibujan con SVG -->
+                <svg class="map-path" width="100%" height="100%">
+                    <polyline id="path-line" fill="none" stroke="rgba(255,105,180,0.4)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="map-line"></polyline>
+                </svg>
+
+                <!-- Avatar Osita -->
+                <div id="osita-avatar">🐻</div>
+
+                <!-- Los nodos (niveles) se inyectarán por JavaScript -->
+                <div id="nodes-container"></div>
+            </div>
+        </section>
+
+
+        <!-- PANTALLA 3: LA PREGUNTA/NIVEL -->
+        <section id="screen-game-question" class="screen flex-col w-full glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
+            <button onclick="navTo('screen-map')" class="absolute top-4 left-4 text-gray-400 hover:text-white z-10"><i class="fa-solid fa-arrow-left mr-2"></i> Mapa</button>
+            
+            <div class="flex justify-between items-center mb-6 mt-4 border-b border-white/10 pb-4">
+                <span id="level-indicator" class="text-pink-300 font-bold uppercase tracking-widest text-lg bg-pink-900/30 px-4 py-1.5 rounded-full mario-font">Mundo 1</span>
                 <div class="flex gap-2 text-red-500 text-xl" id="lives-container"></div>
             </div>
 
@@ -354,62 +230,84 @@
 
             <div id="answer-container" class="w-full mb-4 min-h-[100px] flex flex-col justify-center"></div>
 
-            <button id="btn-submit" onclick="checkTextAnswer()" class="hidden w-full mt-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300">
-                Confirmar Respuesta
+            <button id="btn-submit" onclick="checkTextAnswer()" class="hidden w-full mt-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300 text-xl">
+                Confirmar
             </button>
 
+            <!-- Bloqueo temporal por fallar -->
             <div id="cooldown-overlay" class="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20 hidden backdrop-blur-xl">
-                <i class="fa-solid fa-lock text-6xl text-red-500 mb-4 animate-pulse"></i>
-                <h3 class="text-3xl font-bold text-white mb-2">Bloqueado</h3>
-                <p class="text-gray-400 mb-4">Demasiados fallos.</p>
-                <span class="text-5xl font-bold text-red-500 title-font" id="cooldown-timer">15</span>
+                <div class="text-7xl mb-4 animate-bounce">🐺🗯️</div>
+                <h3 class="text-3xl font-bold text-white mb-2">¡Cuidado Osita!</h3>
+                <p class="text-gray-400 mb-4">El lobito dice que pienses bien...</p>
+                <span class="text-5xl font-bold text-red-500 title-font" id="cooldown-timer">10</span>
             </div>
-            
-            <div id="polaroid-overlay" class="absolute inset-0 bg-black/90 z-30 hidden flex flex-col items-center justify-center backdrop-blur-md cursor-pointer" onclick="nextLevelFromPolaroid()">
-                <div class="polaroid" id="polaroid-card">
-                    <img id="polaroid-img" src="" alt="Recuerdo">
-                    <p>¡Recuerdo Desbloqueado!</p>
+        </section>
+
+        <!-- OVERLAY: MENSAJE AL PASAR DE NIVEL -->
+        <div id="level-passed-overlay" class="modal-overlay" onclick="closeLevelPassedOverlay()">
+            <div class="polaroid" id="polaroid-card">
+                <div class="text-center py-6">
+                    <i class="fa-solid fa-star text-6xl text-yellow-400 mb-4 animate-spin-slow"></i>
+                    <h2 class="text-3xl mario-font text-pink-500 mb-2">¡Nivel Superado!</h2>
+                    <p class="text-gray-600" id="passed-msg">¡La osita avanza!</p>
                 </div>
-                <p class="mt-8 text-gray-400 text-sm animate-pulse">Toca para continuar</p>
+                <p class="mt-4 text-xs text-gray-400">Toca para continuar el viaje</p>
             </div>
-        </section>
+        </div>
 
-        <section id="screen-game-prize" class="screen flex-col items-center justify-center w-full">
-            <h2 class="text-4xl md:text-5xl title-font mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 text-center">¡Reto Superado!</h2>
-            <p class="text-lg mb-8 text-center text-gray-300">Elige tu recompensa misteriosa:</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full" id="prizes-container"></div>
-            <button id="btn-reveal-prize" onclick="revealFinalPrize()" class="mt-10 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-4 px-10 rounded-full scale-0 opacity-0 transition-all duration-500">
-                Revelar Premio <i class="fa-solid fa-unlock ml-2"></i>
-            </button>
-        </section>
-
-        <section id="screen-game-ticket" class="screen flex-col items-center justify-center text-center">
-            <div class="bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600 rounded-3xl p-1 shadow-[0_0_50px_rgba(250,204,21,0.6)] transform hover:scale-105 transition duration-500 max-w-sm w-full">
+        <!-- PANTALLA FINAL: EL PREMIO -->
+        <section id="screen-game-prize" class="screen flex-col items-center justify-center w-full text-center">
+            <h2 class="text-5xl md:text-6xl title-font mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">¡Lo lograste Valen!</h2>
+            <div class="text-8xl mb-6">🐻💖🐺</div>
+            <p class="text-xl mb-8 text-gray-300">Has superado todos los niveles de nuestro mundo.</p>
+            
+            <div class="bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600 rounded-3xl p-1 shadow-[0_0_50px_rgba(250,204,21,0.6)] transform hover:scale-105 transition duration-500 max-w-sm w-full mx-auto">
                 <div class="border-2 border-dashed border-yellow-800 rounded-[22px] p-8 bg-yellow-100 text-yellow-900">
                     <i class="fa-solid fa-ticket text-5xl text-yellow-700 mb-2"></i>
                     <h2 class="text-xl font-black uppercase tracking-widest border-b-2 border-yellow-800/30 pb-2 inline-block">Vale Dorado</h2>
                     <p class="text-sm mt-4 text-yellow-700/80 uppercase">Válido para:</p>
-                    <p id="final-prize-text" class="text-2xl font-black text-red-700 mb-6 mt-1 font-serif"></p>
-                    <p class="text-xs text-yellow-800/70">Tómale screenshot y cóbralo.</p>
+                    <p class="text-2xl font-black text-red-700 mb-6 mt-1 font-serif">Un Día Inolvidable (Elige tu plan)</p>
+                    <p class="text-xs text-yellow-800/70">Tómale screenshot y mándasela al lobito.</p>
                 </div>
             </div>
-            <button onclick="navTo('screen-home')" class="mt-8 text-gray-500 hover:text-white underline text-sm">Volver al inicio</button>
         </section>
 
     </div>
 
     <script>
-        // CONFIGURACIÓN DE TU BACKEND (Reemplazar con la tuya)
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSWvHLXqqA-HQNwkfgsoKnjvC3el3bxSTvsT35mBsYGjL113-rIGlrepA8fbVgWALbZQ/exec"; 
+        // --- AQUÍ LUEGO ME DARÁS LAS 10 PREGUNTAS ---
+        // Por ahora, pondré preguntas de relleno para que pruebes el recorrido.
+        const gameLevels = [
+            { type: 'choice', question: '¿Nivel 1: (Escribe aquí tu pregunta 1)?', options: ['Opción A', 'Opción B (Correcta)'], answer: 'Opción B (Correcta)', msg: '¡Empezamos con el pie derecho!' },
+            { type: 'text', question: 'Nivel 2: Pregunta para escribir', answer: 'amor', msg: '¡Muy bien osita!' },
+            { type: 'choice', question: 'Nivel 3', options: ['1', '2'], answer: '1', msg: 'Avanzando...' },
+            { type: 'choice', question: 'Nivel 4', options: ['A', 'B'], answer: 'A', msg: '¡Eres la mejor!' },
+            { type: 'choice', question: 'Nivel 5', options: ['X', 'Y'], answer: 'X', msg: 'Ya vamos por la mitad' },
+            { type: 'choice', question: 'Nivel 6', options: ['1', '2'], answer: '1', msg: '¡Sigue así!' },
+            { type: 'choice', question: 'Nivel 7', options: ['1', '2'], answer: '1', msg: 'Falta poco...' },
+            { type: 'choice', question: 'Nivel 8', options: ['1', '2'], answer: '1', msg: '¡Wow!' },
+            { type: 'choice', question: 'Nivel 9', options: ['1', '2'], answer: '1', msg: '¡Último paso!' },
+            { type: 'choice', question: 'Nivel 10 (Jefe Final)', options: ['Ganar', 'Perder'], answer: 'Ganar', msg: '¡Lo lograste!' }
+        ];
 
-        let currentQuestions = [];
-        let finalPrizesConfig = [];
-        let loadedGameCode = "";
-        
-        let gameIndex = 0;
+        // Coordenadas de los 10 nodos en el mapa (X%, Y%)
+        const mapCoordinates = [
+            { x: 15, y: 85 }, // Nivel 1 (Abajo izquierda)
+            { x: 45, y: 75 }, // Nivel 2
+            { x: 80, y: 80 }, // Nivel 3
+            { x: 85, y: 55 }, // Nivel 4
+            { x: 50, y: 45 }, // Nivel 5 (Centro)
+            { x: 15, y: 50 }, // Nivel 6
+            { x: 20, y: 25 }, // Nivel 7
+            { x: 50, y: 15 }, // Nivel 8
+            { x: 80, y: 25 }, // Nivel 9
+            { x: 50, y: 5 }   // Nivel 10 (Jefe / Arriba Centro)
+        ];
+
+        let currentLevelIndex = 0; // Nivel actual de la osita (0 a 9)
+        let unlockedLevel = 0;     // Hasta qué nivel ha desbloqueado
         let attemptsLeft = 3;
         let isCooldown = false;
-        let selectedPrizeIndex = -1;
 
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
@@ -424,234 +322,84 @@
             }, 500);
         }
 
-        async function submitPayment() {
-            const name = document.getElementById('buyer-name').value.trim();
-            const email = document.getElementById('buyer-email').value.trim();
-            const fileInput = document.getElementById('buyer-receipt');
-            const msgEl = document.getElementById('payment-msg');
-            const btn = document.getElementById('btn-submit-payment');
+        function enterMapWorld() {
+            navTo('screen-map');
+            buildMap();
+            setTimeout(() => updateOsitaPosition(0), 600); // Mover osita al punto 0 al entrar
+        }
 
-            if(!name || !email || !fileInput.files[0]) {
-                msgEl.textContent = "Por favor llena todos los campos y sube el comprobante.";
-                msgEl.classList.remove('hidden', 'text-green-400');
-                msgEl.classList.add('text-red-400');
-                return;
-            }
-
-            msgEl.textContent = "⏳ Comprimiendo imagen y enviando...";
-            msgEl.classList.remove('hidden', 'text-red-400');
-            msgEl.classList.add('text-yellow-400');
-            btn.disabled = true;
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+        // --- LÓGICA DEL MAPA ---
+        function buildMap() {
+            const container = document.getElementById('nodes-container');
+            container.innerHTML = '';
             
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = async function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.5); 
-                    
-                    const payload = { name: name, email: email, fileName: file.name, file: base64Data };
-
-                    try {
-                        const response = await fetch(APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify(payload)
-                        });
-
-                        const result = await response.json();
-                        if(result.estado === "exito") {
-                            msgEl.textContent = "✅ ¡Enviado! Tu recibo está en verificación.";
-                            msgEl.classList.replace('text-yellow-400', 'text-green-400');
-                            setTimeout(() => { navTo('screen-home'); btn.disabled = false; msgEl.classList.add('hidden'); }, 4000);
-                        } else {
-                            throw new Error(result.mensaje);
-                        }
-                    } catch(err) {
-                        msgEl.textContent = "❌ Error: " + err.message;
-                        msgEl.classList.replace('text-yellow-400', 'text-red-400');
-                        btn.disabled = false;
-                    }
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function loginCreator() {
-            const code = document.getElementById('admin-code').value.trim().toUpperCase();
-            const msg = document.getElementById('creator-login-msg');
-            if (code.length >= 4) {
-                msg.classList.add('hidden');
-                window.currentCreatorCode = code;
-                navTo('screen-creator-dashboard');
-                if(window.initAuth) window.initAuth();
-            } else {
-                msg.textContent = "El código debe tener al menos 4 caracteres.";
-                msg.classList.remove('hidden');
-            }
-        }
-
-        function toggleFormFields() {
-            const type = document.getElementById('q-type').value;
-            document.getElementById('field-options').style.display = type === 'choice' ? 'block' : 'none';
-        }
-
-        document.getElementById('q-image-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const scale = 400 / img.width;
-                    canvas.width = 400; canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('q-image-base64').value = base64;
-                    document.getElementById('image-preview').src = base64;
-                    document.getElementById('image-preview-container').classList.remove('hidden');
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
-        });
-
-        function clearImageUpload() {
-            document.getElementById('q-image-upload').value = '';
-            document.getElementById('q-image-base64').value = '';
-            document.getElementById('image-preview-container').classList.add('hidden');
-        }
-
-        function addQuestion() {
-            const msg = document.getElementById('question-err-msg');
-            const type = document.getElementById('q-type').value;
-            const text = document.getElementById('q-text').value.trim();
-            const answer = document.getElementById('q-answer').value.trim().toLowerCase();
-            const base64Image = document.getElementById('q-image-base64').value;
-
-            if(!text || !answer) {
-                msg.textContent = "Por favor llena la pregunta y la respuesta.";
-                msg.classList.remove('hidden'); return;
-            }
-
-            let options = [];
-            if(type === 'choice') {
-                const optText = document.getElementById('q-options').value.trim();
-                if(!optText) {
-                    msg.textContent = "Llena las opciones separadas por comas.";
-                    msg.classList.remove('hidden'); return;
-                }
-                options = optText.split(',').map(s => s.trim());
-            }
-
-            msg.classList.add('hidden');
-            const newQ = { type, question: text, options, answer: type === 'text' ? answer.split(',') : answer, image: base64Image };
-            currentQuestions.push(newQ);
+            // Dibujar línea SVG entre los puntos
+            let svgPoints = '';
             
-            document.getElementById('q-text').value = '';
-            document.getElementById('q-answer').value = '';
-            document.getElementById('q-options').value = '';
-            clearImageUpload();
-            renderQuestionsList();
-        }
+            mapCoordinates.forEach((coord, i) => {
+                // Añadir puntos al SVG
+                svgPoints += `${coord.x},${coord.y} `;
 
-        function renderQuestionsList() {
-            const list = document.getElementById('questions-list');
-            document.getElementById('q-count').textContent = currentQuestions.length;
-            list.innerHTML = '';
-            currentQuestions.forEach((q, idx) => {
-                const div = document.createElement('div');
-                div.className = 'bg-gray-800 p-3 rounded-lg flex justify-between items-center text-sm border border-gray-700';
-                div.innerHTML = `<div class="truncate pr-4 flex-1"><span class="text-pink-400 font-bold">[${q.type === 'text' ? 'A' : 'M'}]</span> ${q.question}</div><button onclick="removeQuestion(${idx})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>`;
-                list.appendChild(div);
+                // Crear el Nodo (Botón)
+                const node = document.createElement('div');
+                node.className = 'level-node';
+                node.style.left = `${coord.x}%`;
+                node.style.top = `${coord.y}%`;
+                node.innerText = i + 1;
+
+                if (i < unlockedLevel) {
+                    node.classList.add('completed');
+                    node.innerHTML = '<i class="fa-solid fa-check text-sm"></i>';
+                } else if (i === unlockedLevel) {
+                    node.classList.add('unlocked');
+                    node.onclick = () => openLevel(i);
+                } else {
+                    node.innerHTML = '<i class="fa-solid fa-lock text-xs text-gray-400"></i>';
+                }
+
+                container.appendChild(node);
             });
-        }
-        window.removeQuestion = function(idx) { currentQuestions.splice(idx, 1); renderQuestionsList(); }
 
-        async function saveAndGenerateCode() {
-            const msg = document.getElementById('save-msg');
-            if(currentQuestions.length === 0) {
-                msg.textContent = "Agrega al menos 1 pregunta.";
-                msg.classList.remove('hidden'); return;
-            }
-            if(!window.auth || !window.auth.currentUser) {
-                msg.textContent = "Conectando con la base de datos... intenta de nuevo en 2 segundos.";
-                msg.classList.remove('hidden'); window.initAuth(); return;
-            }
-            msg.classList.add('hidden');
-
-            const btn = document.getElementById('btn-save-game');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Guardando...'; btn.disabled = true;
-
-            const prizes = [ document.getElementById('prize-1').value, document.getElementById('prize-2').value, document.getElementById('prize-3').value ];
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let gameCode = ''; for(let i=0; i<4; i++) gameCode += chars.charAt(Math.floor(Math.random() * chars.length));
-
-            const gameData = { creatorId: window.auth.currentUser.uid, createdAt: Date.now(), questions: currentQuestions, prizes: prizes };
-
-            try {
-                const gameRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', gameCode);
-                await window.setDoc(gameRef, gameData);
-                document.getElementById('display-game-code').textContent = gameCode;
-                document.getElementById('modal-game-code').classList.add('active');
-            } catch (e) {
-                msg.textContent = "Error al guardar. Verifica tu conexión."; msg.classList.remove('hidden');
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar y Generar Código'; btn.disabled = false;
-            }
-        }
-        function closeCodeModal() { document.getElementById('modal-game-code').classList.remove('active'); }
-
-        async function loadGameAsPlayer() {
-            const codeInput = document.getElementById('player-code').value.trim().toUpperCase();
-            const errEl = document.getElementById('player-error');
-            const icon = document.getElementById('player-loading-icon');
-            
-            if(codeInput.length !== 4) { errEl.textContent = "El código debe tener 4 caracteres."; errEl.classList.remove('hidden'); return; }
-            errEl.classList.add('hidden'); icon.classList.remove('hidden');
-
-            if(!window.auth || !window.auth.currentUser) await window.initAuth();
-            if(!window.auth.currentUser) return; 
-
-            try {
-                const gameRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', codeInput);
-                const snapshot = await window.getDoc(gameRef);
-                if(snapshot.exists()) {
-                    const data = snapshot.data();
-                    currentQuestions = data.questions; finalPrizesConfig = data.prizes; loadedGameCode = codeInput;
-                    navTo('screen-game-start');
-                } else { errEl.textContent = "Código no encontrado."; errEl.classList.remove('hidden'); }
-            } catch (error) { errEl.textContent = "Error de conexión."; errEl.classList.remove('hidden'); } 
-            finally { icon.classList.add('hidden'); }
+            // Actualizar SVG (para hacer las coordenadas relativas en viewBox)
+            // Calculamos el tamaño basado en porcentajes
+            const svgLine = document.getElementById('path-line');
+            const svgElement = svgLine.parentElement;
+            // Para que la línea SVG coincida con % de CSS:
+            svgElement.setAttribute('viewBox', '0 0 100 100');
+            svgElement.setAttribute('preserveAspectRatio', 'none');
+            svgLine.setAttribute('points', svgPoints);
         }
 
-        function startGameEngine() { navTo('screen-game-question'); gameIndex = 0; attemptsLeft = 3; loadQuestionUI(); }
+        function updateOsitaPosition(index) {
+            const osita = document.getElementById('osita-avatar');
+            const target = mapCoordinates[index];
+            osita.style.left = `${target.x}%`;
+            osita.style.top = `${target.y}%`;
+        }
+
+        // --- LÓGICA DEL JUEGO / PREGUNTAS ---
+        function openLevel(index) {
+            currentLevelIndex = index;
+            attemptsLeft = 3;
+            loadQuestionUI();
+            navTo('screen-game-question');
+        }
 
         function loadQuestionUI() {
-            const q = currentQuestions[gameIndex];
+            const q = gameLevels[currentLevelIndex];
             document.getElementById('question-text').textContent = q.question;
-            document.getElementById('level-indicator').textContent = `Nivel ${gameIndex + 1}/${currentQuestions.length}`;
-            document.getElementById('progress-bar').style.width = `${(gameIndex / currentQuestions.length) * 100}%`;
+            document.getElementById('level-indicator').textContent = `Mundo ${currentLevelIndex + 1}`;
             
             renderLivesUI();
-            const ansCont = document.getElementById('answer-container'); ansCont.innerHTML = ''; 
+            const ansCont = document.getElementById('answer-container'); 
+            ansCont.innerHTML = ''; 
             const btnSub = document.getElementById('btn-submit');
 
             if (q.type === 'text') {
                 btnSub.style.display = 'block';
                 const input = document.createElement('input'); input.type = 'text'; input.id = 'answer-input';
-                input.className = 'w-full bg-black/40 border-2 border-pink-500/50 rounded-xl px-4 py-4 text-center text-xl outline-none focus:border-pink-400';
+                input.className = 'w-full bg-black/40 border-2 border-pink-500/50 rounded-xl px-4 py-4 text-center text-xl outline-none focus:border-pink-400 text-white';
+                input.placeholder = "Escribe aquí tu respuesta...";
                 input.addEventListener('keypress', e => { if (e.key === 'Enter') checkTextAnswer(); });
                 ansCont.appendChild(input); setTimeout(() => input.focus(), 600);
             } else {
@@ -659,7 +407,7 @@
                 const grid = document.createElement('div'); grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 w-full';
                 q.options.forEach(opt => {
                     const btn = document.createElement('button'); btn.textContent = opt;
-                    btn.className = 'bg-gray-800 hover:bg-pink-600 border border-gray-600 font-medium py-4 px-4 rounded-xl transition-all';
+                    btn.className = 'bg-gray-800 hover:bg-pink-600 border border-gray-600 font-medium py-4 px-4 rounded-xl transition-all shadow-md';
                     btn.onclick = () => checkChoiceAnswer(opt); grid.appendChild(btn);
                 });
                 ansCont.appendChild(grid);
@@ -677,34 +425,59 @@
 
         function checkChoiceAnswer(sel) {
             if (isCooldown) return;
-            if (sel.toLowerCase().trim() === currentQuestions[gameIndex].answer.toLowerCase().trim()) handleRight(); else handleWrong();
+            if (sel.toLowerCase().trim() === gameLevels[currentLevelIndex].answer.toLowerCase().trim()) handleRight(); 
+            else handleWrong();
         }
 
         function checkTextAnswer() {
             if (isCooldown) return;
-            const q = currentQuestions[gameIndex];
+            const q = gameLevels[currentLevelIndex];
             const val = document.getElementById('answer-input').value.trim().toLowerCase();
             if (!val) return;
-            const isOk = Array.isArray(q.answer) ? q.answer.some(a => val.includes(a.toLowerCase())) : val.includes(q.answer.toLowerCase());
-            if (isOk) handleRight(); else handleWrong();
+            const correctAns = q.answer.toLowerCase();
+            // Acepta si la palabra correcta está incluida
+            if (val.includes(correctAns)) handleRight(); 
+            else handleWrong();
         }
 
         function handleRight() {
             confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#ff4d6d', '#ffffff', '#ec4899'] });
-            const q = currentQuestions[gameIndex];
-            if(q.image) {
-                const overlay = document.getElementById('polaroid-overlay');
-                document.getElementById('polaroid-img').src = q.image;
-                overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 50);
-            } else { nextLevelFromPolaroid(); }
+            
+            // Mostrar modal de felicitación
+            document.getElementById('passed-msg').textContent = gameLevels[currentLevelIndex].msg;
+            const overlay = document.getElementById('level-passed-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 50);
         }
 
-        function nextLevelFromPolaroid() {
-            const overlay = document.getElementById('polaroid-overlay');
-            overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300);
-            gameIndex++; attemptsLeft = 3; 
-            if (gameIndex < currentQuestions.length) loadQuestionUI();
-            else { document.getElementById('progress-bar').style.width = `100%`; setTimeout(() => finishGameUI(), 500); }
+        function closeLevelPassedOverlay() {
+            const overlay = document.getElementById('level-passed-overlay');
+            overlay.classList.remove('active'); 
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                returnToMapAndAnimate();
+            }, 300);
+        }
+
+        function returnToMapAndAnimate() {
+            navTo('screen-map');
+            
+            // Incrementar progreso
+            if (unlockedLevel === currentLevelIndex) {
+                unlockedLevel++;
+            }
+            
+            // Reconstruir mapa para actualizar estilos (verde para completado, rosa para desbloqueado)
+            setTimeout(() => {
+                buildMap();
+                // Iniciar la cinemática de la osita caminando
+                updateOsitaPosition(unlockedLevel < 10 ? unlockedLevel : 9);
+                
+                // Si completó el nivel 10, llevar al final
+                if (unlockedLevel === 10) {
+                    setTimeout(() => finishGameUI(), 2000);
+                }
+            }, 600); // Dar tiempo a que la pantalla del mapa sea visible
         }
 
         function handleWrong() {
@@ -716,7 +489,7 @@
                 const overlay = document.getElementById('cooldown-overlay');
                 const timerEl = document.getElementById('cooldown-timer');
                 overlay.style.display = 'flex';
-                let t = 15; timerEl.textContent = t;
+                let t = 10; timerEl.textContent = t;
                 const int = setInterval(() => {
                     t--; timerEl.textContent = t;
                     if(t <= 0) {
@@ -729,34 +502,11 @@
 
         function finishGameUI() {
             navTo('screen-game-prize');
-            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
-            const cont = document.getElementById('prizes-container'); cont.innerHTML = '';
-            const icons = ['fa-gift', 'fa-star', 'fa-heart'], colors = ['border-pink-500', 'border-purple-500', 'border-yellow-500'];
-            
-            finalPrizesConfig.forEach((p, i) => {
-                const box = document.createElement('div');
-                box.className = `glass-panel rounded-2xl p-6 text-center border-2 border-gray-600 hover:${colors[i]} cursor-pointer transition-all`;
-                box.onclick = () => selectPrizeUI(i, box);
-                box.innerHTML = `<i class="fa-solid ${icons[i]} text-4xl mb-3 animate-float text-gray-300"></i><h3 class="text-xl font-bold mb-2">Caja ${i+1}</h3><p class="text-xs text-gray-400">Misterio...</p>`;
-                cont.appendChild(box);
-            });
-        }
-
-        function selectPrizeUI(idx, el) {
-            selectedPrizeIndex = idx;
-            document.querySelectorAll('#prizes-container > div').forEach(d => { d.style.borderColor = '#4b5563'; d.style.transform = 'scale(1)'; });
-            el.style.borderColor = '#facc15'; el.style.transform = 'scale(1.05)';
-            document.getElementById('btn-reveal-prize').classList.remove('scale-0', 'opacity-0');
-        }
-
-        function revealFinalPrize() {
-            if(selectedPrizeIndex === -1) return;
-            document.getElementById('final-prize-text').textContent = finalPrizesConfig[selectedPrizeIndex];
-            navTo('screen-game-ticket');
-            setTimeout(() => {
-                confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#facc15', '#ffffff'] });
-                confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#facc15', '#ffffff'] });
+            let endConfetti = setInterval(() => {
+                confetti({ particleCount: 30, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#facc15', '#ec4899'] });
+                confetti({ particleCount: 30, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#facc15', '#ec4899'] });
             }, 500);
+            setTimeout(() => clearInterval(endConfetti), 4000);
         }
     </script>
 </body>
